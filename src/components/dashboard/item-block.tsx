@@ -64,7 +64,7 @@ export default function ItemBlock({
       <Accordion type="single" collapsible>
         <AccordionItem
           value={id}
-          className="p-4 dark:bg-dark-surfaceContainerLow bg-light-surfaceContainerLow border-0 rounded-2xl w-full"
+          className="p-4 dark:bg-dark-surfaceContainerLow/50 bg-light-surfaceContainerLow/40 border-0 rounded-2xl w-full"
         >
           <AccordionTrigger className="py-0 pb-4 text-base text-start">
             {title}

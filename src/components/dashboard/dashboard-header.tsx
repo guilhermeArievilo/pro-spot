@@ -1,7 +1,7 @@
 'use client';
 import ProSpotLogo from '@/assets/svg/icons/footer-logo.svg';
 import DashboardMenu from './dashboard-menu';
-import { Avatar, AvatarFallback } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import usePagesStore from '@/store/pages';
@@ -21,12 +21,14 @@ interface DashboardHeaderProps {
   onPressToCreatePage: () => void;
   handlePageClick: (page: Page) => void;
   userName: string;
+  avatarUrl: string;
 }
 
 export default function DashboardHeader({
   onPressToCreatePage,
   userName,
-  handlePageClick
+  handlePageClick,
+  avatarUrl
 }: DashboardHeaderProps) {
   const { signOut } = useAuth();
   const { pages, pageSelected } = usePagesStore();
@@ -50,6 +52,7 @@ export default function DashboardHeader({
       <DropdownMenu>
         <DropdownMenuTrigger>
           <Avatar>
+            <AvatarImage src={avatarUrl} />
             <AvatarFallback>{fallbackChar}</AvatarFallback>
           </Avatar>
         </DropdownMenuTrigger>

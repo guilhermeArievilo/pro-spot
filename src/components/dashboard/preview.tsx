@@ -10,7 +10,7 @@ interface PreviewProps {
 
 export default function Preview({ page }: PreviewProps) {
   return (
-    <div className="relative w-full h-[800px] overflow-hidden rounded-4xl">
+    <div className="relative w-full h-full overflow-hidden rounded-4xl">
       <HeaderPage name={page.name} profileImage={page.photoProfile} />
       <div className="h-full overflow-y-scroll">
         <div className="w-full flex flex-col gap-6">

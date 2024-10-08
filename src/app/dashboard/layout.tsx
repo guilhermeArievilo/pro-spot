@@ -25,6 +25,7 @@ import { UserScheme } from '@/application/modules/user/entities';
 import { Toaster } from '@/components/ui/sonner';
 import { AsideMenu } from '@/components/dashboard/aside-menu';
 import Loading from '@/components/loading';
+import DashboardScreen from '@/application/modules/pages/presentation/screens/dashboard-screen';
 
 export default function DashboardLayout({
   children
@@ -115,17 +116,17 @@ export default function DashboardLayout({
   if (!isLoaded || !userId) {
     return redirect('./auth/sign-in');
   }
+
   return (
-    <div className="flex flex-col h-screen">
-      <DashboardHeader
+    <>
+      <DashboardScreen
         onPressToCreatePage={toggleModalTrigger}
-        handlePageClick={(page) => setSelectedPage(page)}
-        userName={user?.firstName || 'Pro Spot'}
-      />
-      <div className="flex-grow flex overflow-hidden">
-        <AsideMenu />
+        navigateToPage={(page) => setSelectedPage(page)}
+        userName={user?.firstName || ''}
+        avatarUrl={userData?.photoProfile?.src || ''}
+      >
         {children}
-      </div>
+      </DashboardScreen>
       <Drawer open={toggleModal}>
         <DrawerContent>
           <div className="container">
@@ -145,6 +146,6 @@ export default function DashboardLayout({
         </DrawerContent>
       </Drawer>
       <Toaster />
-    </div>
+    </>
   );
 }

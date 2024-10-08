@@ -2,12 +2,14 @@
 
 import { Page } from '@/application/entities';
 import { PageSchema } from '@/application/modules/pages/entities';
+import DashboardScreen from '@/application/modules/pages/presentation/screens/dashboard-screen';
 import GetPageByIdUsecase from '@/application/modules/pages/usecases/get-page-by-id-usecase';
 import UpdatePageUsecase from '@/application/modules/pages/usecases/update-page-usecase';
 import GeralInfoData from '@/components/dashboard/geral-info-data';
 import ItemBlock from '@/components/dashboard/item-block';
 import Preview from '@/components/dashboard/preview';
 import SectionBlock from '@/components/dashboard/section-block';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import axiosInstance from '@/infra/http/axiosService';
 import { GraphQlClient } from '@/infra/http/onClientApolloService';
@@ -63,64 +65,62 @@ export default function ShowPage() {
     }
   }, [pageSelected]);
 
+  if (!currentPage) {
+    <main className="flex flex-col justify-center items-center">
+      <span>Não encontramos sua página</span>
+    </main>;
+  }
+
   return (
-    <main className="flex flex-col items-center p-6 overflow-y-auto w-full">
-      {currentPage ? (
-        <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-3">
-            {currentPage && <Preview page={currentPage} />}
-          </div>
-          <div className="col-span-9">
-            <Tabs
-              defaultValue="content"
-              className="w-full flex-1 flex flex-col gap-4 items-center"
-            >
-              <TabsList>
-                <TabsTrigger value="content">Conteúdo</TabsTrigger>
-                <TabsTrigger value="geral-info">
-                  Informações Gerais da Página
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="content" className="w-full">
-                <div className="w-full flex flex-col gap-6">
-                  <div className="flex flex-col gap-4">
-                    <div className="flex">
-                      <span className="text-2xl">Secções</span>
-                    </div>
-                    {currentPage.sectionsPages?.map((section, index) => (
-                      <SectionBlock
-                        key={section.id}
-                        section={section}
-                        open={index === 0}
-                      />
-                    ))}
-                    <div className="w-full h-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
-                    <div className="flex">
-                      <span className="text-2xl">Itens</span>
-                    </div>
-                    {currentPage.items?.map((item) => (
-                      <ItemBlock key={item.id} item={item} />
-                    ))}
-                  </div>
+    <main className="max-h-full w-full grid grid-cols-12 gap-6 p-4">
+      <div className="col-span-3 h-full overflow-hidden">
+        {currentPage && <Preview page={currentPage} />}
+      </div>
+      <div className="col-span-9 h-full overflow-hidden">
+        <Tabs
+          defaultValue="content"
+          className="h-full w-full flex-1 flex flex-col gap-4 items-center"
+        >
+          <TabsList>
+            <TabsTrigger value="content">Conteúdo</TabsTrigger>
+            <TabsTrigger value="geral-info">
+              Informações Gerais da Página
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="content" className="w-full overflow-y-auto">
+            <div className="w-full flex flex-col gap-6">
+              <div className="flex flex-col gap-4">
+                <div className="flex">
+                  <span className="text-2xl">Secções</span>
                 </div>
-              </TabsContent>
-              <TabsContent value="geral-info" className="w-full">
-                <div className="col-span-6">
-                  <GeralInfoData
-                    page={currentPage}
-                    onUpdatePage={setCurrentPage}
-                    onSubmitGeralInfo={updateCurrentPage}
+                {currentPage?.sectionsPages?.map((section, index) => (
+                  <SectionBlock
+                    key={section.id}
+                    section={section}
+                    open={index === 0}
                   />
+                ))}
+                <div className="w-full h-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
+                <div className="flex">
+                  <span className="text-2xl">Itens</span>
                 </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-        </div>
-      ) : (
-        <div className="col-span-12 flex items-center justify-center">
-          <span>Não encontramos essa página</span>
-        </div>
-      )}
+                {currentPage?.items?.map((item) => (
+                  <ItemBlock key={item.id} item={item} />
+                ))}
+              </div>
+            </div>
+          </TabsContent>
+          <TabsContent value="geral-info" className="w-full">
+            {currentPage && (
+              <GeralInfoData
+                page={currentPage}
+                onUpdatePage={setCurrentPage}
+                onSubmitGeralInfo={updateCurrentPage}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
     </main>
   );
 }
