@@ -20,9 +20,17 @@ import {
   FormMessage
 } from '../ui/form';
 import { Input } from '../ui/input';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import {
+  RadioGroup,
+  RadioGroupBlockItem,
+  RadioGroupItem
+} from '../ui/radio-group';
 import PlusIcon from '@/assets/svg/icons/plus.svg';
 import ItemBlock from './item-block';
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
+
+import AlignStartIcon from '@/assets/svg/icons/align-left.svg';
+import AlignCenterIcon from '@/assets/svg/icons/align-center.svg';
 
 const formSchema = z.object({
   title: z.string(),
@@ -53,6 +61,7 @@ export default function SectionBlock({
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log(values);
     if (onSave) {
       onSave(values as Section);
     }
@@ -100,6 +109,7 @@ export default function SectionBlock({
                     </FormItem>
                   )}
                 />
+
                 <FormField
                   control={form.control}
                   name="alignContent"
@@ -110,23 +120,29 @@ export default function SectionBlock({
                         <RadioGroup
                           onValueChange={field.onChange}
                           defaultValue={field.value}
-                          className="flex items-center gap-8"
+                          className="w-fit flex dark:bg-dark-surface bg-light-surface p-1 rounded-lg"
                         >
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="start" />
+                          <FormItem className="flex-1 flex items-center space-x-3">
+                            <FormControl className="w-full flex items-center">
+                              <RadioGroupBlockItem
+                                value="start"
+                                className="flex items-center gap-3 rounded-md px-4"
+                              >
+                                <AlignStartIcon />
+                                <span>Esquerda</span>
+                              </RadioGroupBlockItem>
                             </FormControl>
-                            <FormLabel className="font-normal">
-                              Esquerda
-                            </FormLabel>
                           </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="center" />
+                          <FormItem className="flex-1 flex items-center space-x-3">
+                            <FormControl className="w-full flex items-center">
+                              <RadioGroupBlockItem
+                                value="center"
+                                className="flex items-center gap-3 rounded-md px-4"
+                              >
+                                <AlignCenterIcon />
+                                <span>Centro</span>
+                              </RadioGroupBlockItem>
                             </FormControl>
-                            <FormLabel className="font-normal">
-                              Centro
-                            </FormLabel>
                           </FormItem>
                         </RadioGroup>
                       </FormControl>
@@ -153,10 +169,14 @@ export default function SectionBlock({
               </Button>
             </div>
             <div className="col-span-4 w-full flex items-center gap-4">
-              <Button variant={'outline'} className="flex-1">
+              <Button variant={'outline'} className="flex-1" type="button">
                 Cancelar
               </Button>
-              <Button type="submit" className="flex-1">
+              <Button
+                type="button"
+                className="flex-1"
+                onClick={form.handleSubmit(onSubmit)}
+              >
                 Salvar
               </Button>
             </div>

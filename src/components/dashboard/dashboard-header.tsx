@@ -16,10 +16,19 @@ import {
 import { Button } from '../ui/button';
 import { useAuth } from '@clerk/nextjs';
 import { Page } from '@/application/entities';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger
+} from '../ui/sheet';
 
 interface DashboardHeaderProps {
   onPressToCreatePage: () => void;
   handlePageClick: (page: Page) => void;
+  onSignOut: () => void;
   userName: string;
   avatarUrl: string;
 }
@@ -28,9 +37,9 @@ export default function DashboardHeader({
   onPressToCreatePage,
   userName,
   handlePageClick,
-  avatarUrl
+  avatarUrl,
+  onSignOut
 }: DashboardHeaderProps) {
-  const { signOut } = useAuth();
   const { pages, pageSelected } = usePagesStore();
 
   const fallbackChar = userName.split(' ').reduce((prevName, currentName) => {
@@ -49,31 +58,25 @@ export default function DashboardHeader({
         pageSelected={pageSelected}
         onPageClick={handlePageClick}
       />
-      <DropdownMenu>
-        <DropdownMenuTrigger>
+      <Sheet>
+        <SheetTrigger>
           <Avatar>
             <AvatarImage src={avatarUrl} />
             <AvatarFallback>{fallbackChar}</AvatarFallback>
           </Avatar>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          <DropdownMenuLabel>{`Olá, ${userName}`}</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <Button
-              className="w-full"
-              variant={'destructive'}
-              onClick={() =>
-                signOut({
-                  redirectUrl: '/'
-                })
-              }
-            >
-              Sair
-            </Button>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>{`Olá, ${userName}`}</SheetTitle>
+            <SheetDescription>Configurações da sua conta</SheetDescription>
+          </SheetHeader>
+          <div className="flex flex-col gap-4 py-6">
+            <Button variant={'ghost'}>Perfil</Button>
+            <Button variant={'ghost'}>Suporte</Button>
+            <Button variant={'destructive'}>Sair</Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </header>
   );
 }

@@ -9,6 +9,7 @@ import GeralInfoData from '@/components/dashboard/geral-info-data';
 import ItemBlock from '@/components/dashboard/item-block';
 import Preview from '@/components/dashboard/preview';
 import SectionBlock from '@/components/dashboard/section-block';
+import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import axiosInstance from '@/infra/http/axiosService';
@@ -17,8 +18,27 @@ import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strap
 import usePagesStore from '@/store/pages';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import ShareIcon from '@/assets/svg/icons/share.svg';
+import MoreHorizontalIcon from '@/assets/svg/icons/more-horizontal.svg';
+import { Switch } from '@/components/ui/switch';
+import { FormLabel } from '@/components/ui/form';
+import TopBodyMenu from '@/components/dashboard/top-body-menu';
+
+const navigationMenuPage = [
+  {
+    label: 'Conteúdo',
+    value: 'content'
+  },
+  {
+    label: 'Informações Gerais da Página',
+    value: 'geral'
+  }
+];
 
 export default function ShowPage() {
+  const [currentTab, setCurrentTab] = useState<string>(
+    navigationMenuPage[0].value
+  );
   const [currentPage, setCurrentPage] = useState<Page>();
   const { pages, setSelectedPage, pageSelected } = usePagesStore();
   const pagesRepository = new StrapiPagesApiRepository(
@@ -72,22 +92,32 @@ export default function ShowPage() {
   }
 
   return (
-    <main className="max-h-full w-full grid grid-cols-12 gap-6 p-4">
-      <div className="col-span-3 h-full overflow-hidden">
-        {currentPage && <Preview page={currentPage} />}
-      </div>
-      <div className="col-span-9 h-full overflow-hidden">
-        <Tabs
-          defaultValue="content"
-          className="h-full w-full flex-1 flex flex-col gap-4 items-center"
-        >
-          <TabsList>
-            <TabsTrigger value="content">Conteúdo</TabsTrigger>
-            <TabsTrigger value="geral-info">
-              Informações Gerais da Página
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value="content" className="w-full overflow-y-auto">
+    <main className="max-h-full w-full grid grid-cols-12 gap-6 pt-4 px-4">
+      {currentPage && (
+        <div className="col-span-12">
+          <TopBodyMenu
+            pageName={currentPage.name}
+            clicks={300}
+            views={1000}
+            onSharedPress={() => {}}
+            options={navigationMenuPage}
+            defaultOption={navigationMenuPage[0].value}
+            onOptionChange={(opionValue) => {
+              setCurrentTab(opionValue);
+            }}
+          />
+        </div>
+      )}
+      {currentPage && (
+        <div className="col-span-3 h-full flex items-center justify-center overflow-hidden pb-4">
+          <div className="h-full aspect-[9/16]">
+            <Preview page={currentPage} />
+          </div>
+        </div>
+      )}
+      {currentPage && (
+        <div className="col-span-9 h-full overflow-y-auto px-6">
+          {currentTab === 'content' && (
             <div className="w-full flex flex-col gap-6">
               <div className="flex flex-col gap-4">
                 <div className="flex">
@@ -109,18 +139,16 @@ export default function ShowPage() {
                 ))}
               </div>
             </div>
-          </TabsContent>
-          <TabsContent value="geral-info" className="w-full">
-            {currentPage && (
-              <GeralInfoData
-                page={currentPage}
-                onUpdatePage={setCurrentPage}
-                onSubmitGeralInfo={updateCurrentPage}
-              />
-            )}
-          </TabsContent>
-        </Tabs>
-      </div>
+          )}
+          {currentTab === 'geral' && (
+            <GeralInfoData
+              page={currentPage}
+              onUpdatePage={setCurrentPage}
+              onSubmitGeralInfo={updateCurrentPage}
+            />
+          )}
+        </div>
+      )}
     </main>
   );
 }

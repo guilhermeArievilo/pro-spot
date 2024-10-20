@@ -9,6 +9,7 @@ interface DashboardScreenProps {
   userName: string;
   avatarUrl: string;
   children: ReactNode;
+  onSignOut: () => void;
 }
 
 export default function DashboardScreen({
@@ -16,7 +17,8 @@ export default function DashboardScreen({
   navigateToPage,
   userName,
   children,
-  avatarUrl
+  avatarUrl,
+  onSignOut
 }: DashboardScreenProps) {
   return (
     <div className="h-screen w-screen flex flex-col">
@@ -25,6 +27,7 @@ export default function DashboardScreen({
         handlePageClick={navigateToPage}
         userName={userName}
         avatarUrl={avatarUrl}
+        onSignOut={onSignOut}
       />
       <div className="flex-1 flex overflow-hidden">
         <AsideMenu />

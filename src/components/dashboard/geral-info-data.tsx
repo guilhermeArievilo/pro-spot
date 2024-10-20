@@ -219,7 +219,7 @@ export default function GeralInfoData({
                 control={form.control}
                 name="name"
                 render={({ field }) => (
-                  <FormItem className="col-span-6">
+                  <FormItem className="col-span-2">
                     <FormLabel>Nome da página</FormLabel>
                     <FormControl>
                       <Input placeholder="Nome" {...field} />
@@ -232,7 +232,7 @@ export default function GeralInfoData({
                 control={form.control}
                 name="content"
                 render={({ field }) => (
-                  <FormItem className="col-span-6">
+                  <FormItem className="col-span-4">
                     <FormLabel>Descrição</FormLabel>
                     <FormControl>
                       <Textarea

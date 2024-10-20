@@ -26,17 +26,19 @@ import { Toaster } from '@/components/ui/sonner';
 import { AsideMenu } from '@/components/dashboard/aside-menu';
 import Loading from '@/components/loading';
 import DashboardScreen from '@/application/modules/pages/presentation/screens/dashboard-screen';
+import Error from '@/components/error';
 
 export default function DashboardLayout({
   children
 }: {
   children: React.ReactNode;
 }) {
-  const { isLoaded, userId } = useAuth();
+  const { isLoaded, userId, signOut } = useAuth();
   const { user } = useUser();
   const [toggleModal, setToggleModal] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [onError, setError] = useState(false);
   const { setUser, user: userData } = useUserStore();
   const { setPages, setSelectedPage } = usePagesStore();
   const userRepository = new StrapiUserRepository(GraphQlClient, axiosInstance);
@@ -80,7 +82,13 @@ export default function DashboardLayout({
         phoneNumber: user.phoneNumbers[0]?.phoneNumber!
       });
 
-      if (createdUser?.id) {
+      if (!createdUser) {
+        setIsLoading(false);
+        setError(true);
+        return;
+      }
+
+      if (createdUser.id) {
         setIsLoading(false);
         setUser(createdUser);
       }
@@ -105,16 +113,20 @@ export default function DashboardLayout({
     }
   }, [userData]);
 
-  if (isLoading) {
-    return <Loading />;
-  }
-
   function toggleModalTrigger() {
     setToggleModal(!toggleModal);
   }
 
   if (!isLoaded || !userId) {
     return redirect('./auth/sign-in');
+  }
+
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (!isLoading && onError) {
+    return <Error />;
   }
 
   return (
@@ -124,6 +136,7 @@ export default function DashboardLayout({
         navigateToPage={(page) => setSelectedPage(page)}
         userName={user?.firstName || ''}
         avatarUrl={userData?.photoProfile?.src || ''}
+        onSignOut={signOut}
       >
         {children}
       </DashboardScreen>

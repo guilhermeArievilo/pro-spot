@@ -9,7 +9,6 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../ui/button';
-import PlusIcon from '@/assets/svg/icons/plus.svg';
 import {
   Form,
   FormControl,
@@ -19,7 +18,18 @@ import {
   FormMessage
 } from '../ui/form';
 import { Input } from '../ui/input';
-import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import {
+  RadioGroup,
+  RadioGroupBlockItem,
+  RadioGroupItem
+} from '../ui/radio-group';
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
+
+import BannerSkeleton from '@/assets/svg/elements/types/banner.svg';
+import CardSkeleton from '@/assets/svg/elements/types/card.svg';
+import HorizontalCardSkeleton from '@/assets/svg/elements/types/h-card.svg';
+import ShowcaseSkeleton from '@/assets/svg/elements/types/showcase.svg';
+import ButtonSkeleton from '@/assets/svg/elements/types/button.svg';
 
 const formSchema = z.object({
   title: z.string(),
@@ -105,49 +115,59 @@ export default function ItemBlock({
                   control={form.control}
                   name="type"
                   render={({ field }) => (
-                    <FormItem className="col-span-2">
+                    <FormItem className="col-span-6">
                       <FormLabel>Tipo do card</FormLabel>
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}
                           defaultValue={field.value}
-                          className="flex flex-col gap-4"
+                          className="flex items-center gap-2 bg-dark-surface p-2 rounded-4xl"
                         >
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="banner" />
+                          <FormItem className="flex-1 flex items-center space-x-3">
+                            <FormControl className="w-full flex items-center">
+                              <RadioGroupBlockItem value="banner">
+                                <div className="flex flex-col gap-4">
+                                  <BannerSkeleton className="w-full" />
+                                  <span>Banner</span>
+                                </div>
+                              </RadioGroupBlockItem>
                             </FormControl>
-                            <FormLabel className="font-normal">
-                              Banner
-                            </FormLabel>
                           </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="col" />
+                          <FormItem className="flex-1 flex items-center space-x-3">
+                            <FormControl className="w-full flex items-center">
+                              <RadioGroupBlockItem value="col">
+                                <div className="flex flex-col gap-4">
+                                  <CardSkeleton className="w-full" />
+                                  <span>Card</span>
+                                </div>
+                              </RadioGroupBlockItem>
                             </FormControl>
-                            <FormLabel className="font-normal">
-                              Coluna
-                            </FormLabel>
                           </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="row" />
+                          <FormItem className="flex-1 flex items-center space-x-3">
+                            <FormControl className="w-full flex items-center">
+                              <RadioGroupBlockItem value="row">
+                                <div className="flex flex-col gap-4">
+                                  <HorizontalCardSkeleton className="w-full" />
+                                  <span>Card na horizontal</span>
+                                </div>
+                              </RadioGroupBlockItem>
                             </FormControl>
-                            <FormLabel className="font-normal">Linha</FormLabel>
                           </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="showcase" />
-                            </FormControl>
-                            <FormLabel className="font-normal">
-                              Vitrine
-                            </FormLabel>
+                          <FormItem className="flex-1 flex items-center space-x-3">
+                            <RadioGroupBlockItem value="showcase">
+                              <div className="flex flex-col gap-4">
+                                <ShowcaseSkeleton className="w-full" />
+                                <span>Vitrine</span>
+                              </div>
+                            </RadioGroupBlockItem>
                           </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
-                            <FormControl>
-                              <RadioGroupItem value="button" />
-                            </FormControl>
-                            <FormLabel className="font-normal">Botão</FormLabel>
+                          <FormItem className="flex-1 flex items-center space-x-3">
+                            <RadioGroupBlockItem value="button">
+                              <div className="flex flex-col gap-4">
+                                <ButtonSkeleton className="w-full" />
+                                <span>Botão</span>
+                              </div>
+                            </RadioGroupBlockItem>
                           </FormItem>
                         </RadioGroup>
                       </FormControl>
@@ -155,7 +175,7 @@ export default function ItemBlock({
                     </FormItem>
                   )}
                 />
-                <div className="col-span-4">
+                <div className="col-span-6">
                   <FormField
                     control={form.control}
                     name="link"

@@ -12,7 +12,7 @@ export function AsideMenu() {
       <nav className="flex flex-col gap-4">
         <Link
           className={cn(
-            'p-4 dark:hover:bg-dark-surfaceContainer hover:bg-light-surfaceContainer rounded-xl hover:-translate-y-1 transition-all ease-in-out',
+            'p-4 dark:hover:bg-dark-surfaceContainer hover:bg-light-surfaceContainer rounded-xl transition-all ease-in-out',
             {
               'dark:bg-dark-inverseSurface bg-light-inverseSurface hover:dark:bg-dark-inverseSurface hover:bg-light-inverseSurface':
                 pathname === '/dashboard'
@@ -29,7 +29,7 @@ export function AsideMenu() {
         </Link>
         <button
           className={cn(
-            'p-4 dark:hover:bg-dark-surfaceContainer hover:bg-light-surfaceContainer rounded-xl hover:-translate-y-1 transition-all ease-in-out'
+            'p-4 dark:hover:bg-dark-surfaceContainer hover:bg-light-surfaceContainer rounded-xl transition-all ease-in-out'
           )}
           type="button"
         >
@@ -37,7 +37,7 @@ export function AsideMenu() {
         </button>
         <Link
           className={cn(
-            'p-4 dark:hover:bg-dark-surfaceContainer hover:bg-light-surfaceContainer rounded-xl hover:-translate-y-1 transition-all ease-in-out',
+            'p-4 dark:hover:bg-dark-surfaceContainer hover:bg-light-surfaceContainer rounded-xl transition-all ease-in-out',
             {
               'dark:bg-dark-inverseSurface bg-light-inverseSurface':
                 pathname === '/dashboard/trendigs'
