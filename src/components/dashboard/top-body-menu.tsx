@@ -37,14 +37,14 @@ export default function TopBodyMenu({
             <RadioGroupBlockItem
               value={value}
               key={value}
-              className="first:border-r last:border-l rounded-none w-fit px-6 data-[state=checked]:bg-transparent data-[state=unchecked]:bg-transparent data-[state=unchecked]:opacity-60"
+              className="text-sm first:border-r last:border-l rounded-none w-fit px-6 data-[state=checked]:bg-transparent data-[state=unchecked]:bg-transparent data-[state=unchecked]:opacity-60"
             >
               {label}
             </RadioGroupBlockItem>
           ))}
         </RadioGroup>
       </div>
-      <div className="flex justify-center items-center gap-3">
+      <div className="flex justify-center items-center gap-6">
         <div className="flex items-center gap-2 pt-2">
           <span>{views} Visitas</span>
           <span className="w-1 h-1 rounded-full bg-foreground" />

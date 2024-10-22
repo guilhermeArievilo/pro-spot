@@ -16,9 +16,9 @@ export default function SlideItems({ items }: SlideItemsProps) {
   return (
     <Swiper
       spaceBetween={16}
-      slidesPerView={items[0].type === 'banner' ? 1.2 : 2.2}
       slidesOffsetBefore={16}
       slidesOffsetAfter={16}
+      slidesPerView={items[0].type === 'banner' ? 1.2 : 2.2}
       centerInsufficientSlides={items[0].type === 'banner' ? true : false}
       className="w-full"
     >

@@ -20,17 +20,13 @@ import {
   FormMessage
 } from '../ui/form';
 import { Input } from '../ui/input';
-import {
-  RadioGroup,
-  RadioGroupBlockItem,
-  RadioGroupItem
-} from '../ui/radio-group';
+import { RadioGroup, RadioGroupBlockItem } from '../ui/radio-group';
 import PlusIcon from '@/assets/svg/icons/plus.svg';
 import ItemBlock from './item-block';
-import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 
 import AlignStartIcon from '@/assets/svg/icons/align-left.svg';
 import AlignCenterIcon from '@/assets/svg/icons/align-center.svg';
+import ChooseTypeItem from './choose-type-item';
 
 const formSchema = z.object({
   title: z.string(),
@@ -161,12 +157,7 @@ export default function SectionBlock({
               </div>
               {items?.map((item) => <ItemBlock item={item} key={item.id} />)}
               <div className="h-6 w-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
-              <Button
-                className="rounded-full dark:bg-dark-surfaceContainer dark:hover:bg-dark-surfaceContainerHighest bg-light-surfaceContainer hover:bg-light-surfaceContainerHighest border dark:border-dark-outline border-light-outline transition-all ease-in-out"
-                variant={'ghost'}
-              >
-                <PlusIcon />
-              </Button>
+              <ChooseTypeItem />
             </div>
             <div className="col-span-4 w-full flex items-center gap-4">
               <Button variant={'outline'} className="flex-1" type="button">

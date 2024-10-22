@@ -1,11 +1,11 @@
-import { Item } from '@/application/entities';
+import { CardType, Item } from '@/application/entities';
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger
 } from '../ui/accordion';
-import { z } from 'zod';
+import { object, z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../ui/button';
@@ -30,45 +30,143 @@ import CardSkeleton from '@/assets/svg/elements/types/card.svg';
 import HorizontalCardSkeleton from '@/assets/svg/elements/types/h-card.svg';
 import ShowcaseSkeleton from '@/assets/svg/elements/types/showcase.svg';
 import ButtonSkeleton from '@/assets/svg/elements/types/button.svg';
+import CardItem from '../ui/card-item';
+import { Separator } from '../ui/separator';
+import { ImageInput } from '../ui/image-input';
+import CarouselSelect from '../ui/carousel-select';
+import { useEffect, useState } from 'react';
+import * as _ from 'lodash';
+import { cn, getImageURLByFile } from '@/lib/utils';
+import { ItemSchema } from '@/application/modules/pages/entities';
 
 const formSchema = z.object({
   title: z.string(),
   subtitle: z.string().optional(),
-  type: z.enum(['row', 'col', 'banner', 'showcase', 'button']),
   link: z.string().optional()
 });
+
+const typeOptions = [
+  { label: 'Card', value: 'col' },
+  { label: 'Card na horizontal', value: 'row' },
+  { label: 'Vitrine', value: 'showcase' },
+  { label: 'Banner', value: 'banner' },
+  { label: 'Botão', value: 'button' }
+];
 
 interface ItemBlockProps {
   item: Item;
   open?: boolean;
   togglePublish?: (itemId: string) => void;
   onDelete?: (itemId: string) => void;
-  onSave?: (page: Item) => void;
+  onSave?: (page: ItemSchema) => void;
+  onUpdateItem?: (item: Item) => void;
 }
 
 export default function ItemBlock({
-  item: { id, title, subtitle, type, link, image },
+  item,
   open,
   togglePublish,
   onDelete,
-  onSave
+  onSave,
+  onUpdateItem
 }: ItemBlockProps) {
+  const { id, title, subtitle, type, link, image } = item;
+  const [typeItem, setTypeItem] = useState<CardType>(type);
+  const [itemBackup, setItemBackup] = useState<Item>();
+  const [itemPreview, setItemPreview] = useState<Item>(item);
+  const [imageItem, setImageItem] = useState<File>();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title,
       subtitle,
-      type,
       link
     }
   });
 
+  const titleWatcher = form.watch('title');
+  const subtitleWatcher = form.watch('subtitle');
+  const linkWatcher = form.watch('link');
+
   function onSubmit(values: z.infer<typeof formSchema>) {
+    const { title, subtitle, link } = values;
+
     if (onSave) {
-      onSave(values as Item);
+      const formData = {
+        title,
+        subtitle,
+        link,
+        type: typeItem
+      };
+
+      if (imageItem instanceof File) {
+        Object.assign(formData, {
+          image: imageItem
+        });
+      }
+
+      onSave(formData);
     }
   }
 
+  function setFileImagem(file?: File) {
+    if (file) {
+      setImageItem(file);
+    }
+  }
+
+  function onDeleteImage() {
+    setItemPreview({
+      ...itemPreview,
+      image: undefined
+    });
+  }
+
+  useEffect(() => {
+    let image = item.image;
+    if (imageItem) {
+      if (item.image) {
+        image = {
+          ...item.image,
+          src: getImageURLByFile(imageItem)
+        };
+      } else {
+        image = {
+          id: '1',
+          height: 236,
+          width: 166,
+          src: getImageURLByFile(imageItem)
+        };
+      }
+    }
+
+    setItemPreview({
+      ...item,
+      title: titleWatcher,
+      subtitle: subtitleWatcher,
+      link: linkWatcher,
+      image,
+      type: typeItem
+    });
+
+    if (onUpdateItem) {
+      onUpdateItem({
+        ...item,
+        title: titleWatcher,
+        subtitle: subtitleWatcher,
+        link: linkWatcher,
+        image,
+        type: typeItem
+      });
+    }
+  }, [titleWatcher, subtitleWatcher, linkWatcher, imageItem, typeItem]);
+
+  useEffect(() => {
+    if (!itemBackup) {
+      setItemBackup(_.cloneDeep(item));
+    }
+  }, []);
   return (
     <div className="w-full">
       <Accordion type="single" collapsible>
@@ -80,123 +178,115 @@ export default function ItemBlock({
             {title}
           </AccordionTrigger>
           <AccordionContent className="pb-0 flex flex-col gap-6">
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="grid grid-cols-6 gap-8"
-              >
-                <FormField
-                  control={form.control}
-                  name="title"
-                  render={({ field }) => (
-                    <FormItem className="col-span-3">
-                      <FormLabel>Título</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Insira um título" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="subtitle"
-                  render={({ field }) => (
-                    <FormItem className="col-span-3">
-                      <FormLabel>Subtítulo</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Insira um subtítulo" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="type"
-                  render={({ field }) => (
-                    <FormItem className="col-span-6">
-                      <FormLabel>Tipo do card</FormLabel>
-                      <FormControl>
-                        <RadioGroup
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                          className="flex items-center gap-2 bg-dark-surface p-2 rounded-4xl"
-                        >
-                          <FormItem className="flex-1 flex items-center space-x-3">
-                            <FormControl className="w-full flex items-center">
-                              <RadioGroupBlockItem value="banner">
-                                <div className="flex flex-col gap-4">
-                                  <BannerSkeleton className="w-full" />
-                                  <span>Banner</span>
-                                </div>
-                              </RadioGroupBlockItem>
-                            </FormControl>
-                          </FormItem>
-                          <FormItem className="flex-1 flex items-center space-x-3">
-                            <FormControl className="w-full flex items-center">
-                              <RadioGroupBlockItem value="col">
-                                <div className="flex flex-col gap-4">
-                                  <CardSkeleton className="w-full" />
-                                  <span>Card</span>
-                                </div>
-                              </RadioGroupBlockItem>
-                            </FormControl>
-                          </FormItem>
-                          <FormItem className="flex-1 flex items-center space-x-3">
-                            <FormControl className="w-full flex items-center">
-                              <RadioGroupBlockItem value="row">
-                                <div className="flex flex-col gap-4">
-                                  <HorizontalCardSkeleton className="w-full" />
-                                  <span>Card na horizontal</span>
-                                </div>
-                              </RadioGroupBlockItem>
-                            </FormControl>
-                          </FormItem>
-                          <FormItem className="flex-1 flex items-center space-x-3">
-                            <RadioGroupBlockItem value="showcase">
-                              <div className="flex flex-col gap-4">
-                                <ShowcaseSkeleton className="w-full" />
-                                <span>Vitrine</span>
-                              </div>
-                            </RadioGroupBlockItem>
-                          </FormItem>
-                          <FormItem className="flex-1 flex items-center space-x-3">
-                            <RadioGroupBlockItem value="button">
-                              <div className="flex flex-col gap-4">
-                                <ButtonSkeleton className="w-full" />
-                                <span>Botão</span>
-                              </div>
-                            </RadioGroupBlockItem>
-                          </FormItem>
-                        </RadioGroup>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="col-span-6">
+            <div className="flex items-center gap-4">
+              <div className="min-w-60 w-2/5 max-w-80 h-96 flex flex-col items-center justify-between gap-3 z-10">
+                <div className="flex-1 w-full flex items-center justify-center">
+                  <div
+                    className={cn('', {
+                      'min-w-60 w-2/5 max-w-64': typeItem === 'col',
+                      'min-w-60 w-full max-w-80': typeItem === 'banner',
+                      'w-full': typeItem === 'button',
+                      'min-w-60 w-full max-w-72': typeItem === 'row',
+                      'min-w-48 w-2/5 max-w-56': typeItem === 'showcase'
+                    })}
+                  >
+                    <CardItem
+                      type={itemPreview.type}
+                      title={itemPreview.title}
+                      link={itemPreview.link}
+                      image={itemPreview.image}
+                      subtitle={itemPreview.subtitle}
+                      preview
+                    />
+                  </div>
+                </div>
+                <div className="w-full">
+                  <CarouselSelect
+                    options={typeOptions}
+                    value={typeItem}
+                    onChange={(type) => {
+                      setTypeItem(type as CardType);
+                    }}
+                  />
+                </div>
+              </div>
+              <Separator orientation="vertical" />
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="flex-1 grid grid-cols-6 gap-8"
+                >
                   <FormField
                     control={form.control}
-                    name="link"
+                    name="title"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Link</FormLabel>
+                      <FormItem className="col-span-3">
+                        <FormLabel>Título</FormLabel>
                         <FormControl>
-                          <Input placeholder="Insira um link" {...field} />
+                          <Input placeholder="Insira um título" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
-              </form>
-            </Form>
+                  <FormField
+                    control={form.control}
+                    name="subtitle"
+                    render={({ field }) => (
+                      <FormItem className="col-span-3">
+                        <FormLabel>Subtítulo</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Insira um subtítulo" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="col-span-2">
+                    <FormField
+                      name="image"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Imagem</FormLabel>
+                          <FormControl>
+                            <ImageInput
+                              {...field}
+                              image={itemPreview.image}
+                              enableDelete
+                              onDelete={onDeleteImage}
+                              onChange={(e) => {
+                                setFileImagem(e.target.files?.[0]);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <div className="col-span-4">
+                    <FormField
+                      control={form.control}
+                      name="link"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Link</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Insira um link" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </form>
+              </Form>
+            </div>
             <div className="col-span-4 w-full flex items-center gap-4">
-              <Button variant={'outline'} className="flex-1">
+              <Button variant={'outline'} type="button" className="flex-1">
                 Cancelar
               </Button>
-              <Button type="submit" className="flex-1">
+              <Button type="button" className="flex-1">
                 Salvar
               </Button>
             </div>

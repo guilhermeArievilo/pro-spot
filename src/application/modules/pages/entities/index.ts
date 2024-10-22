@@ -1,4 +1,4 @@
-import { Item, Media, Section } from '@/application/entities';
+import { CardType, Item, Media, Section } from '@/application/entities';
 
 export type GetPageResponse = {
   id: string;
@@ -34,4 +34,13 @@ export type PageSchema = {
   discord?: string;
   backgroundMedia?: File;
   photoProfile?: File;
+};
+
+export type ItemSchema = {
+  id?: string;
+  title: string;
+  subtitle?: string;
+  link?: string;
+  type: CardType;
+  image?: File;
 };

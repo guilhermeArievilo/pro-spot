@@ -11,6 +11,7 @@ interface CardItemProps {
   link?: string;
   image?: Media;
   type: CardType | string;
+  preview?: boolean;
 }
 
 export default function CardItem(props: CardItemProps) {
@@ -28,7 +29,14 @@ export default function CardItem(props: CardItemProps) {
   }
 }
 
-function RowItem({ title, subtitle, link, image, type }: CardItemProps) {
+function RowItem({
+  title,
+  subtitle,
+  link,
+  image,
+  type,
+  preview
+}: CardItemProps) {
   return (
     <div className="flex justify-between dark:bg-light-surface bg-dark-scrim dark:text-light-onSurface text-dark-onSurface p-3 rounded-xl">
       <div className="flex flex-col">
@@ -41,11 +49,19 @@ function RowItem({ title, subtitle, link, image, type }: CardItemProps) {
   );
 }
 
-function ColItem({ title, subtitle, link, image, type }: CardItemProps) {
+function ColItem({
+  title,
+  subtitle,
+  link,
+  image,
+  type,
+  preview
+}: CardItemProps) {
+  console.log(image);
   return (
     <div
       className={cn(
-        'relative w-full h-64 p-4 rounded-3xl flex flex-col justify-between',
+        'relative w-full aspect-[9/12] p-4 rounded-3xl flex flex-col justify-between overflow-clip',
         {
           'justify-end': !link
         }
@@ -73,7 +89,7 @@ function ColItem({ title, subtitle, link, image, type }: CardItemProps) {
 
 function BannerItem({ title, subtitle, link, image, type }: CardItemProps) {
   return (
-    <div className="relative min-h-44">
+    <div className="relative w-full aspect-video">
       {image && (
         <Image
           src={image.src}
@@ -106,7 +122,7 @@ function ShowcaseItem({ title, subtitle, link, image, type }: CardItemProps) {
           width={image.width}
           height={image.height}
           alt={title}
-          className="w-full h-44 object-cover rounded-3xl"
+          className="w-full aspect-[9/12] object-cover rounded-3xl"
         />
       )}
       <div className="flex flex-col z-10">
@@ -118,7 +134,7 @@ function ShowcaseItem({ title, subtitle, link, image, type }: CardItemProps) {
 }
 
 function ButtonItem({ title, link }: CardItemProps) {
-  return <Button>{title}</Button>;
+  return <Button className="w-full">{title}</Button>;
 }
 
 function LinkButton({

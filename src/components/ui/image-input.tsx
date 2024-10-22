@@ -3,18 +3,30 @@ import * as React from 'react';
 import { Avatar, AvatarImage } from './avatar';
 import { Button } from './button';
 import PlusIcon from '@/assets/svg/icons/plus.svg';
+import TrashIcon from '@/assets/svg/icons/trash.svg';
 import EditIcon from '@/assets/svg/icons/edit.svg';
 import { Media } from '@/application/entities';
 
 interface ImageInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   image?: Media;
   src?: string;
-  onDelete?: (imageId: string) => void;
+  enableDelete?: boolean;
+  onDelete?: () => void;
 }
 
 const ImageInput = React.forwardRef<HTMLInputElement, ImageInputProps>(
   (
-    { className, type, image, src, onDelete, value, onChange, ...props },
+    {
+      className,
+      type,
+      image,
+      src,
+      onDelete,
+      value,
+      onChange,
+      enableDelete,
+      ...props
+    },
     ref
   ) => {
     const localRef = React.useRef<HTMLInputElement>(null);
@@ -35,12 +47,14 @@ const ImageInput = React.forwardRef<HTMLInputElement, ImageInputProps>(
 
     return (
       <div className="w-fit flex items-center gap-3 dark:bg-dark-surfaceContainerLow bg-light-surfaceContainerLow rounded-full p-2">
-        <Avatar>
-          <AvatarImage
-            src={previewUrl || image?.src}
-            className="object-cover"
-          />
-        </Avatar>
+        {(previewUrl || image?.src) && (
+          <Avatar>
+            <AvatarImage
+              src={previewUrl || image?.src}
+              className="object-cover"
+            />
+          </Avatar>
+        )}
         <Button
           variant={'ghost'}
           type="button"
@@ -49,6 +63,17 @@ const ImageInput = React.forwardRef<HTMLInputElement, ImageInputProps>(
         >
           {previewUrl || image?.src ? <EditIcon /> : <PlusIcon />}
         </Button>
+
+        {(previewUrl || image?.src) && enableDelete && (
+          <Button
+            variant={'ghost'}
+            type="button"
+            className="p-2"
+            onClick={onDelete}
+          >
+            <TrashIcon />
+          </Button>
+        )}
         <input
           ref={mergeRefs(ref, localRef)}
           className="hidden"
