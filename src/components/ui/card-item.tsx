@@ -57,7 +57,6 @@ function ColItem({
   type,
   preview
 }: CardItemProps) {
-  console.log(image);
   return (
     <div
       className={cn(

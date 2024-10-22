@@ -5,7 +5,6 @@ import TrashIcon from '@/assets/svg/icons/trash.svg';
 import SaveIcon from '@/assets/svg/icons/save.svg';
 import CloseIcon from '@/assets/svg/icons/close.svg';
 
-import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Input } from './input';
 

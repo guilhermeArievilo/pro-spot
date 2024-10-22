@@ -1,6 +1,6 @@
 'use client';
 
-import { Section } from '@/application/entities';
+import { Item, Section } from '@/application/entities';
 import {
   Accordion,
   AccordionContent,
@@ -27,6 +27,7 @@ import ItemBlock from './item-block';
 import AlignStartIcon from '@/assets/svg/icons/align-left.svg';
 import AlignCenterIcon from '@/assets/svg/icons/align-center.svg';
 import ChooseTypeItem from './choose-type-item';
+import { useEffect, useState } from 'react';
 
 const formSchema = z.object({
   title: z.string(),
@@ -40,13 +41,17 @@ interface SectionBlockProps {
   togglePublish?: (sectionId: string) => void;
   onDelete?: (sectionId: string) => void;
   onSave?: (page: Section) => void;
+  onUpdated?: (section: Section) => void;
 }
 
 export default function SectionBlock({
-  section: { id, title, subtitle, alignContent, items },
+  section,
   onSave,
-  open
+  open,
+  onUpdated
 }: SectionBlockProps) {
+  const { id, title, subtitle, alignContent, items } = section;
+  const [liveItems, setLiveItems] = useState<Item[]>(items ? items : []);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,12 +61,35 @@ export default function SectionBlock({
     }
   });
 
+  const titleWatcher = form.watch('title');
+  const subtitleWatcher = form.watch('subtitle');
+  const alignContentWatcher = form.watch('alignContent');
+
   function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
     if (onSave) {
       onSave(values as Section);
     }
   }
+
+  function liveUpdateItems(item: Item, index: number) {
+    if (liveItems) {
+      setLiveItems((prevArray) =>
+        prevArray.map((currentItem, i) => (i === index ? item : currentItem))
+      );
+    }
+  }
+
+  useEffect(() => {
+    if (onUpdated) {
+      onUpdated({
+        ...section,
+        title: titleWatcher,
+        subtitle: subtitleWatcher,
+        alignContent: alignContentWatcher,
+        items: liveItems
+      });
+    }
+  }, [titleWatcher, subtitleWatcher, alignContentWatcher, liveItems]);
 
   return (
     <div className="full">
@@ -155,7 +183,13 @@ export default function SectionBlock({
                   Os itens que forem de tipos diferentes serão separados
                 </span>
               </div>
-              {items?.map((item) => <ItemBlock item={item} key={item.id} />)}
+              {items?.map((item, index) => (
+                <ItemBlock
+                  item={item}
+                  key={item.id}
+                  onUpdateItem={(item) => liveUpdateItems(item, index)}
+                />
+              ))}
               <div className="h-6 w-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
               <ChooseTypeItem />
             </div>

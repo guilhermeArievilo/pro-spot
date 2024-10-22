@@ -18,18 +18,6 @@ import {
   FormMessage
 } from '../ui/form';
 import { Input } from '../ui/input';
-import {
-  RadioGroup,
-  RadioGroupBlockItem,
-  RadioGroupItem
-} from '../ui/radio-group';
-import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
-
-import BannerSkeleton from '@/assets/svg/elements/types/banner.svg';
-import CardSkeleton from '@/assets/svg/elements/types/card.svg';
-import HorizontalCardSkeleton from '@/assets/svg/elements/types/h-card.svg';
-import ShowcaseSkeleton from '@/assets/svg/elements/types/showcase.svg';
-import ButtonSkeleton from '@/assets/svg/elements/types/button.svg';
 import CardItem from '../ui/card-item';
 import { Separator } from '../ui/separator';
 import { ImageInput } from '../ui/image-input';
@@ -38,6 +26,8 @@ import { useEffect, useState } from 'react';
 import * as _ from 'lodash';
 import { cn, getImageURLByFile } from '@/lib/utils';
 import { ItemSchema } from '@/application/modules/pages/entities';
+import TrashIcon from '@/assets/svg/icons/trash.svg';
+import PlayIcon from '@/assets/svg/icons/play.svg';
 
 const formSchema = z.object({
   title: z.string(),
@@ -172,9 +162,17 @@ export default function ItemBlock({
       <Accordion type="single" collapsible>
         <AccordionItem
           value={id}
-          className="p-4 dark:bg-dark-surfaceContainerLow/50 bg-light-surfaceContainerLow/40 border-0 rounded-2xl w-full"
+          className="relative p-4 dark:bg-dark-surfaceContainerLow/50 bg-light-surfaceContainerLow/40 border-0 rounded-2xl w-full"
         >
-          <AccordionTrigger className="py-0 pb-4 text-base text-start">
+          <div className="flex absolute top-2 right-12 gap-2">
+            <Button variant={'ghost'} type="button" className="p-2">
+              <PlayIcon />
+            </Button>
+            <Button variant={'ghost'} type="button" className="p-2">
+              <TrashIcon />
+            </Button>
+          </div>
+          <AccordionTrigger className="py-0 pb-4 text-base text-start flex justify-between">
             {title}
           </AccordionTrigger>
           <AccordionContent className="pb-0 flex flex-col gap-6">

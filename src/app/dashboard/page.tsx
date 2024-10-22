@@ -1,6 +1,6 @@
 'use client';
 
-import { Page } from '@/application/entities';
+import { Page, Section } from '@/application/entities';
 import { PageSchema } from '@/application/modules/pages/entities';
 import GetPageByIdUsecase from '@/application/modules/pages/usecases/get-page-by-id-usecase';
 import UpdatePageUsecase from '@/application/modules/pages/usecases/update-page-usecase';
@@ -8,7 +8,6 @@ import GeralInfoData from '@/components/dashboard/geral-info-data';
 import ItemBlock from '@/components/dashboard/item-block';
 import Preview from '@/components/dashboard/preview';
 import SectionBlock from '@/components/dashboard/section-block';
-import { Button } from '@/components/ui/button';
 import axiosInstance from '@/infra/http/axiosService';
 import { GraphQlClient } from '@/infra/http/onClientApolloService';
 import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
@@ -16,7 +15,6 @@ import usePagesStore from '@/store/pages';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import TopBodyMenu from '@/components/dashboard/top-body-menu';
-import PlusIcon from '@/assets/svg/icons/plus.svg';
 import ChooseTypeItem from '@/components/dashboard/choose-type-item';
 
 const navigationMenuPage = [
@@ -47,6 +45,17 @@ export default function ShowPage() {
       setSelectedPage(pages[0]);
     }
   }, [pages]);
+
+  function liveUpdateSection(section: Section, index: number) {
+    if (currentPage) {
+      const sections = currentPage.sectionsPages || [];
+      sections[index] = section;
+      setCurrentPage({
+        ...currentPage,
+        sectionsPages: sections
+      });
+    }
+  }
 
   async function fetchPageById(id: string) {
     const getPageById = new GetPageByIdUsecase(pagesRepository);
@@ -123,6 +132,7 @@ export default function ShowPage() {
                       key={section.id}
                       section={section}
                       open={index === 0}
+                      onUpdated={(section) => liveUpdateSection(section, index)}
                     />
                   ))}
                 </div>
