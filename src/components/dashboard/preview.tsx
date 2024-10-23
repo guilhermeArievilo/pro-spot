@@ -3,12 +3,18 @@ import { HeaderPage } from '../page/header-page';
 import { Page } from '@/application/entities';
 import Section from '../page/section';
 import FooterPage from '../page/footer-page';
+import CardItem from '../ui/card-item';
+import { groupByType } from '@/lib/utils';
+import SlideItems from '../page/slide-items';
+import GridItems from '../page/grid-items';
 
 interface PreviewProps {
   page: Page;
 }
 
 export default function Preview({ page }: PreviewProps) {
+  const groups = page.items?.length ? groupByType(page.items) : null;
+
   return (
     <div className="relative w-full h-full overflow-hidden rounded-4xl">
       <HeaderPage name={page.name} profileImage={page.photoProfile} />
@@ -37,6 +43,24 @@ export default function Preview({ page }: PreviewProps) {
                 />
               )
             )}
+            <div className="flex flex-col gap-4">
+              {groups?.map((items, index) => {
+                const currentType = items[0].type;
+
+                if (currentType === 'col' || currentType === 'banner') {
+                  return (
+                    <SlideItems
+                      items={items}
+                      key={`slide-${page.name}-${index}`}
+                    />
+                  );
+                }
+
+                return (
+                  <GridItems items={items} key={`grid-${page.name}-${index}`} />
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

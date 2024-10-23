@@ -210,10 +210,7 @@ export default function ItemBlock({
               </div>
               <Separator orientation="vertical" />
               <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="flex-1 grid grid-cols-6 gap-8"
-                >
+                <form className="flex-1 grid grid-cols-6 gap-8">
                   <FormField
                     control={form.control}
                     name="title"
@@ -284,7 +281,11 @@ export default function ItemBlock({
               <Button variant={'outline'} type="button" className="flex-1">
                 Cancelar
               </Button>
-              <Button type="button" className="flex-1">
+              <Button
+                type="button"
+                className="flex-1"
+                onClick={form.handleSubmit(onSubmit)}
+              >
                 Salvar
               </Button>
             </div>

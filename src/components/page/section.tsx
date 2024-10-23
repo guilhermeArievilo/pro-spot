@@ -2,6 +2,7 @@ import HeaderSection from './header-section';
 import SlideItems from './slide-items';
 import GridItems from './grid-items';
 import { AlignContent, Item } from '@/application/entities';
+import { groupByType } from '@/lib/utils';
 
 interface SectionProps {
   title: string;
@@ -35,36 +36,15 @@ export default function Section({
         subtitle={subtitle}
         alignContent={alignContent}
       />
-      {groups.map((items) => {
+      {groups.map((items, index) => {
         const currentType = items[0].type;
 
         if (currentType === 'col' || currentType === 'banner') {
-          return <SlideItems items={items} key={`slide-${title}`} />;
+          return <SlideItems items={items} key={`slide-${title}-${index}`} />;
         }
 
-        return <GridItems items={items} key={`grid-${title}`} />;
+        return <GridItems items={items} key={`grid-${title}-${index}`} />;
       })}
     </section>
   );
-}
-
-function groupByType(items: Item[]) {
-  const groups: Item[][] = [];
-
-  items.forEach((item) => {
-    const { type } = item;
-
-    const groupIndex = groups.findIndex((items) => {
-      const foundType = items.find((currentItem) => type === currentItem.type);
-      return foundType;
-    });
-
-    if (groupIndex !== -1) {
-      groups[groupIndex].push(item);
-    } else {
-      groups.push([item]);
-    }
-  });
-
-  return groups;
 }

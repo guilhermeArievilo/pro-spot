@@ -1,9 +1,24 @@
-import { Page } from '@/application/entities';
-import { GetPageResponse, PageSchema } from '../entities';
+import { Item, Page } from '@/application/entities';
+import {
+  GetPageResponse,
+  ItemSchema,
+  PageSchema,
+  SectionSchema
+} from '../entities';
 
 export type UpdatePageRequest = {
-  data: PageSchema;
   id: string;
+  data: PageSchema;
+};
+
+export type UpdateSectionRequest = {
+  id: string;
+  data: SectionSchema;
+};
+
+export type UpdateItemRequest = {
+  id: string;
+  data: ItemSchema;
 };
 
 export default abstract class PageRepository {
@@ -12,4 +27,7 @@ export default abstract class PageRepository {
   abstract getPagesByUser(userId: string): Promise<Page[]>;
   abstract getPageById(id: string): Promise<Page>;
   abstract updatePage(props: UpdatePageRequest): Promise<void>;
+  abstract updateSection(props: UpdateSectionRequest): Promise<void>;
+  abstract updateItem(props: UpdateItemRequest): Promise<void>;
+  abstract createItem(props: ItemSchema): Promise<Item>;
 }

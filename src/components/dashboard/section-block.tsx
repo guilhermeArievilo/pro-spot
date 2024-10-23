@@ -28,6 +28,11 @@ import AlignStartIcon from '@/assets/svg/icons/align-left.svg';
 import AlignCenterIcon from '@/assets/svg/icons/align-center.svg';
 import ChooseTypeItem from './choose-type-item';
 import { useEffect, useState } from 'react';
+import {
+  ItemSchema,
+  SectionSchema
+} from '@/application/modules/pages/entities';
+import CreateItemRotine from './choose-type-item';
 
 const formSchema = z.object({
   title: z.string(),
@@ -40,15 +45,19 @@ interface SectionBlockProps {
   open?: boolean;
   togglePublish?: (sectionId: string) => void;
   onDelete?: (sectionId: string) => void;
-  onSave?: (page: Section) => void;
+  onSave?: (page: SectionSchema) => void;
   onUpdated?: (section: Section) => void;
+  onItemSave?: (item: ItemSchema, id: string) => void;
+  onCreateItem?: (item: ItemSchema) => void;
 }
 
 export default function SectionBlock({
   section,
   onSave,
   open,
-  onUpdated
+  onUpdated,
+  onItemSave,
+  onCreateItem
 }: SectionBlockProps) {
   const { id, title, subtitle, alignContent, items } = section;
   const [liveItems, setLiveItems] = useState<Item[]>(items ? items : []);
@@ -65,9 +74,26 @@ export default function SectionBlock({
   const subtitleWatcher = form.watch('subtitle');
   const alignContentWatcher = form.watch('alignContent');
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  function onSubmit({
+    title,
+    subtitle,
+    alignContent
+  }: z.infer<typeof formSchema>) {
     if (onSave) {
-      onSave(values as Section);
+      const schema: SectionSchema = {
+        title,
+        subtitle,
+        alignContent
+      };
+
+      if (items) {
+        const itemsId = items.map((item) => item.id);
+        Object.assign(schema, {
+          items: itemsId
+        });
+      }
+
+      onSave(schema);
     }
   }
 
@@ -76,6 +102,12 @@ export default function SectionBlock({
       setLiveItems((prevArray) =>
         prevArray.map((currentItem, i) => (i === index ? item : currentItem))
       );
+    }
+  }
+
+  function addItem(item: ItemSchema) {
+    if (onCreateItem) {
+      onCreateItem(item);
     }
   }
 
@@ -188,10 +220,15 @@ export default function SectionBlock({
                   item={item}
                   key={item.id}
                   onUpdateItem={(item) => liveUpdateItems(item, index)}
+                  onSave={(currentItem) => {
+                    if (onItemSave) {
+                      onItemSave(currentItem, item.id);
+                    }
+                  }}
                 />
               ))}
               <div className="h-6 w-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
-              <ChooseTypeItem />
+              <CreateItemRotine onCreateAItem={addItem} />
             </div>
             <div className="col-span-4 w-full flex items-center gap-4">
               <Button variant={'outline'} className="flex-1" type="button">

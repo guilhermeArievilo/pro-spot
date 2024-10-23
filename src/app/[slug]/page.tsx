@@ -1,5 +1,6 @@
 import GetPageUsecase from '@/application/modules/pages/usecases/get-page-usecase';
 import Section from '@/components/page/section';
+import CardItem from '@/components/ui/card-item';
 import { getClient } from '@/infra/http/apolloService';
 import axiosInstance from '@/infra/http/axiosService';
 import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
@@ -47,6 +48,18 @@ export default async function HomePage({ params }: HomePageProps) {
             />
           )
         )}
+        <div className="px-4">
+          {page.items?.map(({ id, title, type, image, link, subtitle }) => (
+            <CardItem
+              title={title}
+              subtitle={subtitle}
+              type={type}
+              image={image}
+              link={link}
+              key={id}
+            />
+          ))}
+        </div>
       </div>
     </main>
   );

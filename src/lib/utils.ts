@@ -1,3 +1,4 @@
+import { Item } from '@/application/entities';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -18,4 +19,25 @@ export function createSlug(text: string): string {
 export function getImageURLByFile(file: File) {
   const url = URL.createObjectURL(file);
   return url;
+}
+
+export function groupByType(items: Item[]) {
+  const groups: Item[][] = [];
+
+  items.forEach((item) => {
+    const { type } = item;
+
+    const groupIndex = groups.findIndex((items) => {
+      const foundType = items.find((currentItem) => type === currentItem.type);
+      return foundType;
+    });
+
+    if (groupIndex !== -1) {
+      groups[groupIndex].push(item);
+    } else {
+      groups.push([item]);
+    }
+  });
+
+  return groups;
 }

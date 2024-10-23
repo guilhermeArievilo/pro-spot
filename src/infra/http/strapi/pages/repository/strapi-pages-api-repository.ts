@@ -1,15 +1,17 @@
 import {
   GetPageResponse,
+  ItemSchema,
   PageSchema
 } from '@/application/modules/pages/entities';
 import PageRepository, {
-  UpdatePageRequest
+  UpdateItemRequest,
+  UpdatePageRequest,
+  UpdateSectionRequest
 } from '@/application/modules/pages/repository/page-repository';
 import { ApolloClient, gql } from '@apollo/client';
-import { RemotePage, toPageDomain } from '../mappers';
+import { RemotePage, toPageDomain, toPageItemDomain } from '../mappers';
 import { AxiosInstance } from 'axios';
-import { Page } from '@/application/entities';
-import { object } from 'zod';
+import { Item, Page } from '@/application/entities';
 
 export default class StrapiPagesApiRepository implements PageRepository {
   constructor(
@@ -279,7 +281,9 @@ export default class StrapiPagesApiRepository implements PageRepository {
       facebook,
       whatsapp,
       backgroundMedia,
-      photoProfile
+      photoProfile,
+      items,
+      sections
     } = data;
 
     const bodyData = {
@@ -293,6 +297,22 @@ export default class StrapiPagesApiRepository implements PageRepository {
       facebook,
       whatsapp
     };
+
+    if (items?.length) {
+      Object.assign(bodyData, {
+        page_items: {
+          set: items
+        }
+      });
+    }
+
+    if (sections?.length) {
+      Object.assign(bodyData, {
+        section_pages: {
+          set: sections
+        }
+      });
+    }
 
     if (backgroundMedia && backgroundMedia instanceof File) {
       const mediaId = await this.updateFile({
@@ -333,6 +353,106 @@ export default class StrapiPagesApiRepository implements PageRepository {
     }
   }
 
+  async updateSection({ id, data }: UpdateSectionRequest): Promise<void> {
+    // /api/section-pages/:id
+
+    const bodyData = {
+      title: data.title,
+      subtitle: data.subtitle,
+      alignContent: data.alignContent
+    };
+
+    if (data.items?.length) {
+      Object.assign(bodyData, {
+        page_items: {
+          set: data.items.map((id) => ({
+            documentId: id
+          }))
+        }
+      });
+    }
+
+    const result = await this.AxiosClientService.put(`/section-pages/${id}`, {
+      data: bodyData
+    });
+
+    if (!result?.data) {
+      throw new Error('Page not updated');
+    }
+  }
+
+  async createItem({
+    title,
+    type,
+    subtitle,
+    link,
+    image
+  }: ItemSchema): Promise<Item> {
+    // /api/page-items
+    const bodyData = {
+      title,
+      subtitle,
+      type,
+      link
+    };
+
+    if (image && image instanceof File) {
+      const mediaId = await this.updateFile({
+        file: image
+      });
+
+      Object.assign(bodyData, {
+        image: {
+          set: [mediaId]
+        }
+      });
+    }
+
+    const result = await this.AxiosClientService.post(`/page-items`, {
+      data: bodyData
+    });
+
+    if (!result.data) {
+      throw new Error('Page not created');
+    }
+
+    return toPageItemDomain(result.data.data);
+  }
+
+  async updateItem({ id, data }: UpdateItemRequest): Promise<void> {
+    // /api/page-items/:id
+
+    const bodyData = {
+      title: data.title,
+      subtitle: data.subtitle,
+      link: data.link,
+      type: data.type
+    };
+
+    if (data.image && data.image instanceof File) {
+      const mediaId = await this.updateFile({
+        file: data.image,
+        refId: id,
+        field: 'image',
+        ref: 'api::page-items.page-items'
+      });
+
+      Object.assign(bodyData, {
+        image: {
+          set: [mediaId]
+        }
+      });
+    }
+
+    const result = await this.AxiosClientService.put(`/page-items/${id}`, {
+      data: bodyData
+    });
+
+    if (!result?.data) {
+      throw new Error('Page not updated');
+    }
+  }
+
   async updateFile({
     file,
     refId,
@@ -340,9 +460,9 @@ export default class StrapiPagesApiRepository implements PageRepository {
     ref
   }: {
     file: File;
-    refId: string;
-    field: string;
-    ref: string;
+    refId?: string;
+    field?: string;
+    ref?: string;
   }) {
     const uploadFormData = new FormData();
     uploadFormData.append('files', file);
