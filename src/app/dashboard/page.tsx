@@ -23,6 +23,10 @@ import UpdateSectionUsecase from '@/application/modules/pages/usecases/update-se
 import UpdateItemUsecase from '@/application/modules/pages/usecases/update-item-usecase';
 import CreateItemRotine from '@/components/dashboard/choose-type-item';
 import CreateItemUsecase from '@/application/modules/pages/usecases/create-item-usecase';
+import DeleteItemUsecase from '@/application/modules/pages/usecases/delete-item-usecase';
+import CreateSectionItemUsecase from '@/application/modules/pages/usecases/create-section-item';
+import ConfirmAction from '@/components/dashboard/confirm-action';
+import { on } from 'events';
 
 const navigationMenuPage = [
   {
@@ -35,7 +39,24 @@ const navigationMenuPage = [
   }
 ];
 
+type ConfirmActionDataProps = {
+  title: string;
+  description: string;
+  open: boolean;
+  onConfirmRef: string;
+  recordId: string;
+  sectionId?: string;
+};
+
 export default function ShowPage() {
+  const [confirmActionData, setConfirmActionData] =
+    useState<ConfirmActionDataProps>({
+      title: 'Excluir item',
+      description: 'Tem certeza que deseja excluir este item ?',
+      open: false,
+      onConfirmRef: 'item',
+      recordId: ''
+    });
   const [currentTab, setCurrentTab] = useState<string>(
     navigationMenuPage[0].value
   );
@@ -85,20 +106,21 @@ export default function ShowPage() {
   async function updateCurrentPage(data: PageSchema) {
     const updatePage = new UpdatePageUsecase(pagesRepository);
     if (currentPage) {
-      const result = await updatePage.execute({
-        id: currentPage.id,
-        data
-      });
-
-      if (result.status === 'success') {
-        await fetchPageById(currentPage.id);
-        toast('Ôba, sua página foi atualizada');
-        return;
-      }
-
-      toast('Ops, tivemos um problema', {
-        description: 'Tente em alguns estantes'
-      });
+      await updatePage
+        .execute({
+          id: currentPage.id,
+          data
+        })
+        .then((page) => {
+          setCurrentPage(page);
+          toast('Ôba, sua página foi atualizada');
+        })
+        .catch((e) => {
+          console.error(e);
+          toast('Ops, tivemos um problema', {
+            description: 'Tente em alguns estantes'
+          });
+        });
     }
   }
 
@@ -139,27 +161,111 @@ export default function ShowPage() {
   }
 
   async function createItem(item: ItemSchema, sectionId?: string) {
-    const createItemCase = new CreateItemUsecase(pagesRepository);
+    if (sectionId && currentPage?.sectionsPages?.length) {
+      const contextSectionIndex = currentPage.sectionsPages.findIndex(
+        (currentSection) => currentSection.id === sectionId
+      );
 
-    const createdItem = await createItemCase.execute(item);
+      if (contextSectionIndex > -1) {
+        const currentSection = currentPage.sectionsPages[contextSectionIndex];
 
-    if (!createdItem) {
+        // Começa o processo de criação e relacionamento das entidades.
+        const createSectionItemCase = new CreateSectionItemUsecase(
+          pagesRepository
+        );
+
+        return await createSectionItemCase
+          .execute({
+            data: item,
+            section: currentSection
+          })
+          .then((sectionItems) => {
+            setCurrentPage({
+              ...currentPage,
+              sectionsPages: currentPage?.sectionsPages?.map((section) => {
+                if (section.id === sectionId) {
+                  return {
+                    ...section,
+                    items: sectionItems
+                  };
+                }
+                return section;
+              })
+            });
+            toast(`O Item "${item.title}" criado com sucesso!`);
+          })
+          .catch((e) => {
+            console.error(e);
+            toast('Ops, tivemos um problema', {
+              description: 'Tente em alguns estantes'
+            });
+          });
+      }
+
       toast('Ops, tivemos um problema', {
-        description: 'Tente em alguns estantes'
+        description: 'Algo deu errado com a secção em questão.'
       });
       return;
     }
 
-    toast(`O item "${createdItem.title!} foi criado!"`);
+    // Se for um item avulso
+    const createItemCase = new CreateItemUsecase(pagesRepository);
+    await createItemCase
+      .execute(item)
+      .then(async (createdItem) => {
+        const itemsPage: Item[] = currentPage?.items?.length
+          ? currentPage.items
+          : [];
+
+        itemsPage.push(createdItem);
+
+        const updatePageCase = new UpdatePageUsecase(pagesRepository);
+
+        await updatePageCase
+          .execute({
+            id: currentPage?.id!,
+            data: {
+              items: itemsPage.map((item) => item.id)
+            }
+          })
+          .then(() => {
+            setCurrentPage({
+              ...currentPage,
+              items: itemsPage
+            } as Page);
+            toast(`O Item "${item.title}" criado com sucesso!`);
+          });
+      })
+      .catch((e) => {
+        console.error(e);
+
+        toast('Ops, tivemos um problema', {
+          description:
+            'Algo deu errado ao criar o item, tente em alguns estantes.'
+        });
+      });
+  }
+
+  async function deleteItem(id: string, sectionId?: string) {
+    const deleteItemCase = new DeleteItemUsecase(pagesRepository);
 
     if (currentPage?.sectionsPages?.length && sectionId) {
       const contextSectionIndex = currentPage.sectionsPages.findIndex(
         (currentSection) => currentSection.id === sectionId
       );
+
       if (contextSectionIndex > -1) {
         const contextItems =
           currentPage.sectionsPages[contextSectionIndex].items;
-        contextItems?.push(createdItem as Item);
+
+        const itemIndex = contextItems?.findIndex(
+          (currentItem) => currentItem.id === id
+        );
+
+        if (itemIndex && itemIndex > -1 && contextItems) {
+          contextItems.splice(itemIndex, 1);
+        }
+
         setCurrentPage({
           ...currentPage,
           sectionsPages: currentPage.sectionsPages.map((currentSection) => {
@@ -172,44 +278,77 @@ export default function ShowPage() {
             return currentSection;
           })
         });
+
+        const sectionToUpdate = currentPage.sectionsPages[contextSectionIndex];
+
+        await updateSection(
+          {
+            title: sectionToUpdate.title,
+            alignContent: sectionToUpdate.alignContent,
+            items: contextItems?.map((item) => item.id)
+          },
+          sectionId
+        );
+
+        const result = await deleteItemCase.execute(id);
+        if (result.status === 'error') {
+          toast('Ops, tivemos um problema', {
+            description: 'Não foi possível excluir seu item.'
+          });
+          return;
+        }
+        toast(`O item foi excluído!"`);
+        return;
       }
 
+      toast('Ops, tivemos um problema', {
+        description: 'Parece que a secção em questão não existe mais.'
+      });
       return;
     }
 
     if (currentPage?.items?.length) {
       const currentItems = currentPage.items;
-      currentItems.push(createdItem as Item);
 
-      await updateCurrentPage({
-        id: currentPage.id,
-        slug: currentPage.slug,
-        name: currentPage.name,
-        content: currentPage.content,
-        items: currentItems.map((item) => item.id)
-      });
+      const itemIndex = currentItems?.findIndex(
+        (currentItem) => currentItem.id === id
+      );
 
-      setCurrentPage({
-        ...currentPage,
-        items: currentItems
-      });
+      if (itemIndex && itemIndex > -1 && currentItems) {
+        currentItems.splice(itemIndex, 1);
+      }
 
-      return;
+      const updatePageCase = new UpdatePageUsecase(pagesRepository);
+      await updatePageCase
+        .execute({
+          id: currentPage.id,
+          data: {
+            items: currentItems.map((item) => item.id)
+          }
+        })
+        .then(async () => {
+          await deleteItemCase.execute(id);
+          setCurrentPage({
+            ...currentPage,
+            items: currentItems
+          });
+        })
+        .catch(() => {
+          toast('Ops, tivemos um problema', {
+            description: 'Não foi possível excluir seu item.'
+          });
+        });
+
+      toast(`O item foi excluído!"`);
     }
+  }
 
-    if (currentPage) {
-      await updateCurrentPage({
-        id: currentPage.id,
-        slug: currentPage.slug,
-        name: currentPage.name,
-        content: currentPage.content,
-        items: [createdItem.id]
-      });
-
-      setCurrentPage({
-        ...currentPage,
-        items: [createdItem as Item]
-      });
+  async function onDeleteConfirmation() {
+    if (
+      confirmActionData.onConfirmRef === 'item' &&
+      confirmActionData.recordId
+    ) {
+      await deleteItem(confirmActionData.recordId, confirmActionData.sectionId);
     }
   }
 
@@ -244,7 +383,7 @@ export default function ShowPage() {
       )}
       {currentPage && (
         <div className="col-span-3 h-full flex items-center justify-center overflow-hidden pb-4">
-          <div className="h-full aspect-[9/16]">
+          <div className="h-full aspect-[9/16] overflow-hidden">
             <Preview page={currentPage} />
           </div>
         </div>
@@ -267,6 +406,17 @@ export default function ShowPage() {
                       }}
                       onItemSave={(item, id) => updateItem(item, id)}
                       onCreateItem={(entry) => createItem(entry, section.id)}
+                      onDeleteItem={(id, title) => {
+                        setConfirmActionData({
+                          open: true,
+                          description:
+                            'Tem certeza que deseja excluir este item ?',
+                          title: `Você está excluindo o item ${title}`,
+                          onConfirmRef: 'item',
+                          recordId: id,
+                          sectionId: section.id
+                        });
+                      }}
                     />
                   ))}
                 </div>
@@ -283,6 +433,16 @@ export default function ShowPage() {
                       item={item}
                       onSave={(currentItem) => updateItem(currentItem, item.id)}
                       onUpdateItem={(item) => liveUpdateItem(item, index)}
+                      onDelete={(id) => {
+                        setConfirmActionData({
+                          open: true,
+                          description:
+                            'Tem certeza que deseja excluir este item ?',
+                          title: `Você está excluindo o item ${item.title}`,
+                          onConfirmRef: 'item',
+                          recordId: id
+                        });
+                      }}
                     />
                   ))}
                 </div>
@@ -302,6 +462,18 @@ export default function ShowPage() {
           )}
         </div>
       )}
+      <ConfirmAction
+        title={confirmActionData.title}
+        description={confirmActionData.description}
+        open={confirmActionData.open}
+        onChangeOpen={(open) => {
+          setConfirmActionData({
+            ...confirmActionData,
+            open
+          });
+        }}
+        onConfirm={onDeleteConfirmation}
+      />
     </main>
   );
 }

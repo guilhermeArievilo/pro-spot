@@ -26,10 +26,10 @@ export type GetPageResponse = {
 };
 
 export type PageSchema = {
-  id: string;
-  slug: string;
-  name: string;
-  content: string;
+  id?: string;
+  slug?: string;
+  name?: string;
+  content?: string;
   instagram?: string;
   x?: string;
   site?: string;
@@ -46,9 +46,9 @@ export type PageSchema = {
 
 export type SectionSchema = {
   id?: string;
-  title: string;
+  title?: string;
   subtitle?: string;
-  alignContent: AlignContent;
+  alignContent?: AlignContent;
   items?: string[];
 };
 

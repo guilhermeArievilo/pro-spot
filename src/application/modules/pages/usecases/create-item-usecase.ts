@@ -5,13 +5,8 @@ import PageRepository from '../repository/page-repository';
 export default class CreateItemUsecase {
   constructor(private repository: PageRepository) {}
 
-  async execute(item: ItemSchema): Promise<Item | null> {
-    try {
-      const createdItem = await this.repository.createItem(item);
-      return createdItem;
-    } catch (e) {
-      console.error(e);
-      return null;
-    }
+  async execute(item: ItemSchema): Promise<Item> {
+    const createdItem = await this.repository.createItem(item);
+    return createdItem;
   }
 }

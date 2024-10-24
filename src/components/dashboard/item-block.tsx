@@ -168,7 +168,16 @@ export default function ItemBlock({
             <Button variant={'ghost'} type="button" className="p-2">
               <PlayIcon />
             </Button>
-            <Button variant={'ghost'} type="button" className="p-2">
+            <Button
+              variant={'ghost'}
+              type="button"
+              className="p-2"
+              onClick={() => {
+                if (onDelete) {
+                  onDelete(id);
+                }
+              }}
+            >
               <TrashIcon />
             </Button>
           </div>

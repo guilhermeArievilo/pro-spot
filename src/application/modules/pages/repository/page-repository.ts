@@ -1,4 +1,4 @@
-import { Item, Page } from '@/application/entities';
+import { Item, Page, Section } from '@/application/entities';
 import {
   GetPageResponse,
   ItemSchema,
@@ -26,8 +26,9 @@ export default abstract class PageRepository {
   abstract addPage(page: PageSchema): Promise<GetPageResponse>;
   abstract getPagesByUser(userId: string): Promise<Page[]>;
   abstract getPageById(id: string): Promise<Page>;
-  abstract updatePage(props: UpdatePageRequest): Promise<void>;
-  abstract updateSection(props: UpdateSectionRequest): Promise<void>;
-  abstract updateItem(props: UpdateItemRequest): Promise<void>;
+  abstract updatePage(props: UpdatePageRequest): Promise<Page>;
+  abstract updateSection(props: UpdateSectionRequest): Promise<Section>;
   abstract createItem(props: ItemSchema): Promise<Item>;
+  abstract updateItem(props: UpdateItemRequest): Promise<void>;
+  abstract deleteItem(id: string): Promise<void>;
 }

@@ -65,6 +65,7 @@ export default function CreateItemRotine({
       title,
       type
     });
+    form.reset();
     setOpenDialog(false);
   }
 
@@ -185,7 +186,7 @@ export default function CreateItemRotine({
             >
               Cancelar
             </Button>
-            <Button type="submit" onClick={form.handleSubmit(initializeAItem)}>
+            <Button type="button" onClick={form.handleSubmit(initializeAItem)}>
               Continuar
             </Button>
           </DialogFooter>

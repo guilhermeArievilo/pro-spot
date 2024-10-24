@@ -49,6 +49,7 @@ interface SectionBlockProps {
   onUpdated?: (section: Section) => void;
   onItemSave?: (item: ItemSchema, id: string) => void;
   onCreateItem?: (item: ItemSchema) => void;
+  onDeleteItem?: (id: string, title: string) => void;
 }
 
 export default function SectionBlock({
@@ -57,7 +58,8 @@ export default function SectionBlock({
   open,
   onUpdated,
   onItemSave,
-  onCreateItem
+  onCreateItem,
+  onDeleteItem
 }: SectionBlockProps) {
   const { id, title, subtitle, alignContent, items } = section;
   const [liveItems, setLiveItems] = useState<Item[]>(items ? items : []);
@@ -223,6 +225,11 @@ export default function SectionBlock({
                   onSave={(currentItem) => {
                     if (onItemSave) {
                       onItemSave(currentItem, item.id);
+                    }
+                  }}
+                  onDelete={(id) => {
+                    if (onDeleteItem) {
+                      onDeleteItem(id, item.title);
                     }
                   }}
                 />

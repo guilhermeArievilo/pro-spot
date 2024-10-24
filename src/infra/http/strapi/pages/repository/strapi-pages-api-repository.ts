@@ -9,9 +9,14 @@ import PageRepository, {
   UpdateSectionRequest
 } from '@/application/modules/pages/repository/page-repository';
 import { ApolloClient, gql } from '@apollo/client';
-import { RemotePage, toPageDomain, toPageItemDomain } from '../mappers';
+import {
+  RemotePage,
+  toPageDomain,
+  toPageItemDomain,
+  toSectionPageDomain
+} from '../mappers';
 import { AxiosInstance } from 'axios';
-import { Item, Page } from '@/application/entities';
+import { Item, Page, Section } from '@/application/entities';
 
 export default class StrapiPagesApiRepository implements PageRepository {
   constructor(
@@ -19,63 +24,40 @@ export default class StrapiPagesApiRepository implements PageRepository {
     private AxiosClientService: AxiosInstance
   ) {}
 
-  async getPageById(id: string): Promise<Page> {
-    const query = gql`
-      query Page($documentId: ID!) {
-        page(documentId: $documentId) {
-          name
-          slug
+  private getPageByIdQuery = gql`
+    query Page($documentId: ID!) {
+      page(documentId: $documentId) {
+        name
+        slug
+        documentId
+        content
+        photoProfile {
           documentId
-          content
-          photoProfile {
-            documentId
-            url
-            width
-            height
-            mime
-            alternativeText
-          }
-          backgroundMedia {
-            documentId
-            width
-            url
-            height
-            mime
-            alternativeText
-          }
-          facebook
-          instagram
-          linkedin
+          url
+          width
+          height
+          mime
+          alternativeText
+        }
+        backgroundMedia {
+          documentId
+          width
+          url
+          height
+          mime
+          alternativeText
+        }
+        facebook
+        instagram
+        linkedin
+        createdAt
+        x
+        whatsapp
+        updatedAt
+        section_pages {
+          documentId
+          alignContent
           createdAt
-          x
-          whatsapp
-          updatedAt
-          section_pages {
-            documentId
-            alignContent
-            createdAt
-            page_items {
-              documentId
-              createdAt
-              image {
-                documentId
-                width
-                url
-                height
-                mime
-                alternativeText
-              }
-              link
-              subtitle
-              title
-              type
-              updatedAt
-            }
-            title
-            subtitle
-            updatedAt
-            publishedAt
-          }
           page_items {
             documentId
             createdAt
@@ -93,13 +75,36 @@ export default class StrapiPagesApiRepository implements PageRepository {
             type
             updatedAt
           }
+          title
+          subtitle
+          updatedAt
           publishedAt
         }
+        page_items {
+          documentId
+          createdAt
+          image {
+            documentId
+            width
+            url
+            height
+            mime
+            alternativeText
+          }
+          link
+          subtitle
+          title
+          type
+          updatedAt
+        }
+        publishedAt
       }
-    `;
+    }
+  `;
 
+  async getPageById(id: string): Promise<Page> {
     const { data, error } = await this.ApolloClientService.query({
-      query,
+      query: this.getPageByIdQuery,
       variables: {
         documentId: id
       }
@@ -269,7 +274,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
     return toPageDomain(data.pages[0]);
   }
 
-  async updatePage({ id, data }: UpdatePageRequest): Promise<void> {
+  async updatePage({ id, data }: UpdatePageRequest): Promise<Page> {
     const {
       slug,
       name,
@@ -346,14 +351,27 @@ export default class StrapiPagesApiRepository implements PageRepository {
 
     const result = await this.AxiosClientService.put(`/pages/${id}`, {
       data: bodyData
+    }).then(async () => {
+      const { data: pageData, error } = await this.ApolloClientService.query({
+        query: this.getPageByIdQuery,
+        variables: {
+          documentId: id
+        }
+      });
+
+      return pageData;
     });
 
-    if (!result?.data) {
-      throw new Error('Page not updated');
+    if (!result?.page) {
+      throw new Error('Could not find page');
     }
+
+    return toPageDomain({
+      ...result.page
+    });
   }
 
-  async updateSection({ id, data }: UpdateSectionRequest): Promise<void> {
+  async updateSection({ id, data }: UpdateSectionRequest): Promise<Section> {
     // /api/section-pages/:id
 
     const bodyData = {
@@ -379,6 +397,8 @@ export default class StrapiPagesApiRepository implements PageRepository {
     if (!result?.data) {
       throw new Error('Page not updated');
     }
+
+    return toSectionPageDomain(result.data.data);
   }
 
   async createItem({
@@ -451,6 +471,11 @@ export default class StrapiPagesApiRepository implements PageRepository {
     if (!result?.data) {
       throw new Error('Page not updated');
     }
+  }
+
+  async deleteItem(id: string): Promise<void> {
+    // /api/page-items/:id
+    await this.AxiosClientService.delete(`/page-items/${id}`);
   }
 
   async updateFile({
