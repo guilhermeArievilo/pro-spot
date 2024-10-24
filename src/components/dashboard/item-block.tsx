@@ -60,7 +60,7 @@ export default function ItemBlock({
   onSave,
   onUpdateItem
 }: ItemBlockProps) {
-  const { id, title, subtitle, type, link, image } = item;
+  const { id, title, subtitle, type, link } = item;
   const [typeItem, setTypeItem] = useState<CardType>(type);
   const [itemBackup, setItemBackup] = useState<Item>();
   const [itemPreview, setItemPreview] = useState<Item>(item);

@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '../ui/dropdown-menu';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -36,11 +36,21 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../ui/input';
-import { CardType, Item } from '@/application/entities';
+import { CardType } from '@/application/entities';
 import { ItemSchema } from '@/application/modules/pages/entities';
+import { ImageInput } from '../ui/image-input';
 
 const formSchema = z.object({
-  title: z.string()
+  title: z.string().min(1, { message: 'O título é obrigatório' })
+});
+
+const formImageSchema = z.object({
+  title: z.string().min(1, { message: 'O título é obrigatório' }),
+  image: z
+    .instanceof(File, { message: 'Faça o upload de uma imagem' })
+    .refine((file) => file.type.startsWith('image/'), {
+      message: 'O arquivo deve ser uma imagem'
+    })
 });
 
 interface CreateItemRotineProps {
@@ -51,6 +61,7 @@ export default function CreateItemRotine({
   onCreateAItem
 }: CreateItemRotineProps) {
   const [type, setType] = useState<CardType>('banner');
+  const [containImage, setContainImage] = useState<boolean>(true);
   const [openDialog, setOpenDialog] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -60,14 +71,34 @@ export default function CreateItemRotine({
     }
   });
 
-  function initializeAItem({ title }: z.infer<typeof formSchema>) {
+  const imageForm = useForm<z.infer<typeof formImageSchema>>({
+    resolver: zodResolver(formImageSchema),
+    defaultValues: {
+      title: ''
+    }
+  });
+
+  function initializeAItem({ title, image }: { title: string; image?: File }) {
     onCreateAItem({
       title,
-      type
+      type,
+      image
     });
-    form.reset();
+    if (containImage) {
+      imageForm.reset();
+    } else {
+      form.reset();
+    }
     setOpenDialog(false);
   }
+
+  useEffect(() => {
+    if (type === 'banner' || type === 'col' || type === 'showcase') {
+      setContainImage(true);
+    } else {
+      setContainImage(false);
+    }
+  }, [type]);
 
   return (
     <>
@@ -158,26 +189,70 @@ export default function CreateItemRotine({
             </DialogTitle>
             <DialogDescription>Escolha um título chamativo.</DialogDescription>
           </DialogHeader>
-          <Form {...form}>
-            <form className="w-full grid grid-cols-6 gap-6 py-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem className="col-span-6">
-                    <FormControl>
-                      <Input
-                        placeholder="Insira um título"
-                        {...field}
-                        className="text-center bg-transparent"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </form>
-          </Form>
+          {containImage ? (
+            <Form {...imageForm}>
+              <form className="w-full grid grid-cols-6 gap-6 py-6">
+                <FormField
+                  control={imageForm.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem className="col-span-6">
+                      <FormControl>
+                        <Input
+                          placeholder="Insira um título"
+                          {...field}
+                          className="text-center bg-transparent"
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={imageForm.control}
+                  name="image"
+                  render={({ field }) => (
+                    <FormItem className="col-span-6">
+                      <FormLabel>Imagem</FormLabel>
+                      <FormControl>
+                        <ImageInput
+                          {...field}
+                          value=""
+                          onChange={(e) => {
+                            field.onChange(e.target.files?.[0]);
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          ) : (
+            <Form {...form}>
+              <form className="w-full grid grid-cols-6 gap-6 py-6">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }) => (
+                    <FormItem className="col-span-6">
+                      <FormControl>
+                        <Input
+                          placeholder="Insira um título"
+                          {...field}
+                          className="text-center bg-transparent"
+                          required
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </form>
+            </Form>
+          )}
           <DialogFooter className="flex items-center gap-4">
             <Button
               type="button"
@@ -186,7 +261,14 @@ export default function CreateItemRotine({
             >
               Cancelar
             </Button>
-            <Button type="button" onClick={form.handleSubmit(initializeAItem)}>
+            <Button
+              type="button"
+              onClick={
+                containImage
+                  ? imageForm.handleSubmit(initializeAItem)
+                  : form.handleSubmit(initializeAItem)
+              }
+            >
               Continuar
             </Button>
           </DialogFooter>

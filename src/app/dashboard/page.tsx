@@ -255,15 +255,21 @@ export default function ShowPage() {
       );
 
       if (contextSectionIndex > -1) {
-        const contextItems =
-          currentPage.sectionsPages[contextSectionIndex].items;
+        let contextItems = currentPage.sectionsPages[contextSectionIndex].items;
 
         const itemIndex = contextItems?.findIndex(
           (currentItem) => currentItem.id === id
         );
 
-        if (itemIndex && itemIndex > -1 && contextItems) {
+        if (
+          itemIndex &&
+          itemIndex > -1 &&
+          contextItems &&
+          contextItems.length > 1
+        ) {
           contextItems.splice(itemIndex, 1);
+        } else {
+          contextItems = undefined;
         }
 
         setCurrentPage({
@@ -285,7 +291,7 @@ export default function ShowPage() {
           {
             title: sectionToUpdate.title,
             alignContent: sectionToUpdate.alignContent,
-            items: contextItems?.map((item) => item.id)
+            items: contextItems?.map((item) => item.id) || undefined
           },
           sectionId
         );
@@ -308,14 +314,21 @@ export default function ShowPage() {
     }
 
     if (currentPage?.items?.length) {
-      const currentItems = currentPage.items;
+      let currentItems = currentPage.items;
 
       const itemIndex = currentItems?.findIndex(
         (currentItem) => currentItem.id === id
       );
 
-      if (itemIndex && itemIndex > -1 && currentItems) {
+      if (
+        itemIndex &&
+        itemIndex > -1 &&
+        currentItems &&
+        currentItems.length > 1
+      ) {
         currentItems.splice(itemIndex, 1);
+      } else {
+        currentItems = undefined!;
       }
 
       const updatePageCase = new UpdatePageUsecase(pagesRepository);
@@ -323,7 +336,7 @@ export default function ShowPage() {
         .execute({
           id: currentPage.id,
           data: {
-            items: currentItems.map((item) => item.id)
+            items: currentItems?.map((item) => item.id) || undefined
           }
         })
         .then(async () => {
