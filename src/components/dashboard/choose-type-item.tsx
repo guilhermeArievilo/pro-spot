@@ -262,7 +262,11 @@ export default function CreateItemRotine({
             <Button
               type="button"
               variant={'ghost'}
-              onClick={() => setOpenDialog(false)}
+              onClick={() => {
+                imageForm.reset();
+                form.reset();
+                setOpenDialog(false);
+              }}
             >
               Cancelar
             </Button>

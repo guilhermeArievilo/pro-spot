@@ -67,18 +67,6 @@ export default async function HomePage({ params }: HomePageProps) {
             );
           })}
         </div>
-        <div className="px-4">
-          {page.items?.map(({ id, title, type, image, link, subtitle }) => (
-            <CardItem
-              title={title}
-              subtitle={subtitle}
-              type={type}
-              image={image}
-              link={link}
-              key={id}
-            />
-          ))}
-        </div>
       </div>
     </main>
   );

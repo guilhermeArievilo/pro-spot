@@ -262,21 +262,17 @@ export default function ShowPage() {
       );
 
       if (contextSectionIndex > -1) {
-        let contextItems = currentPage.sectionsPages[contextSectionIndex].items;
+        let contextItems =
+          currentPage.sectionsPages[contextSectionIndex].items || [];
 
         const itemIndex = contextItems?.findIndex(
           (currentItem) => currentItem.id === id
         );
 
-        if (
-          itemIndex &&
-          itemIndex > -1 &&
-          contextItems &&
-          contextItems.length > 1
-        ) {
+        if (itemIndex > -1 && contextItems?.length > 1) {
           contextItems.splice(itemIndex, 1);
         } else {
-          contextItems = undefined;
+          contextItems = [];
         }
 
         setCurrentPage({
@@ -327,12 +323,7 @@ export default function ShowPage() {
         (currentItem) => currentItem.id === id
       );
 
-      if (
-        itemIndex &&
-        itemIndex > -1 &&
-        currentItems &&
-        currentItems.length > 1
-      ) {
+      if (itemIndex > -1 && currentItems?.length > 1) {
         currentItems.splice(itemIndex, 1);
       } else {
         currentItems = undefined!;
