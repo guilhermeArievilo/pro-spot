@@ -26,7 +26,8 @@ import CreateItemUsecase from '@/application/modules/pages/usecases/create-item-
 import DeleteItemUsecase from '@/application/modules/pages/usecases/delete-item-usecase';
 import CreateSectionItemUsecase from '@/application/modules/pages/usecases/create-section-item';
 import ConfirmAction from '@/components/dashboard/confirm-action';
-import { on } from 'events';
+import CreateSectionEntry from '@/components/dashboard/create-section-entry';
+import UploadMediaUsecase from '@/application/modules/pages/usecases/upload-media-usecase';
 
 const navigationMenuPage = [
   {
@@ -73,6 +74,12 @@ export default function ShowPage() {
     }
   }, [pages]);
 
+  async function uploadMedia(media: File) {
+    const uploadMediaCase = new UploadMediaUsecase(pagesRepository);
+
+    return await uploadMediaCase.execute(media);
+  }
+
   function liveUpdateSection(section: Section, index: number) {
     if (currentPage) {
       const sections = currentPage.sectionsPages || [];
@@ -112,7 +119,6 @@ export default function ShowPage() {
           data
         })
         .then((page) => {
-          setCurrentPage(page);
           toast('Ôba, sua página foi atualizada');
         })
         .catch((e) => {
@@ -144,6 +150,7 @@ export default function ShowPage() {
 
   async function updateItem(item: ItemSchema, id: string) {
     const updateItemCase = new UpdateItemUsecase(pagesRepository);
+    debugger;
 
     const result = await updateItemCase.execute({
       id,
@@ -151,7 +158,7 @@ export default function ShowPage() {
     });
 
     if (result.status === 'success') {
-      toast(`O Item "${item.title}" foi atualizada`);
+      toast(`O Item foi atualizada`);
       return;
     }
 
@@ -430,12 +437,14 @@ export default function ShowPage() {
                           sectionId: section.id
                         });
                       }}
+                      onUploadMedia={uploadMedia}
                     />
                   ))}
                 </div>
                 {!!currentPage.sectionsPages?.length && (
                   <div className="h-6 w-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
                 )}
+                <CreateSectionEntry onCreateASection={() => {}} />
               </div>
               <div className="flex flex-col items-center gap-4">
                 <span className="text-2xl w-full">Itens Avulsos</span>
@@ -456,13 +465,17 @@ export default function ShowPage() {
                           recordId: id
                         });
                       }}
+                      onUploadMedia={uploadMedia}
                     />
                   ))}
                 </div>
                 {!!currentPage.items?.length && (
                   <div className="h-6 w-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
                 )}
-                <CreateItemRotine onCreateAItem={(item) => createItem(item)} />
+                <CreateItemRotine
+                  onCreateAItem={(item) => createItem(item)}
+                  onUploadMedia={uploadMedia}
+                />
               </div>
             </div>
           )}
@@ -471,6 +484,7 @@ export default function ShowPage() {
               page={currentPage}
               onUpdatePage={setCurrentPage}
               onSubmitGeralInfo={updateCurrentPage}
+              onUploadMedia={uploadMedia}
             />
           )}
         </div>

@@ -16,7 +16,10 @@ import {
   toSectionPageDomain
 } from '../mappers';
 import { AxiosInstance } from 'axios';
-import { Item, Page, Section } from '@/application/entities';
+import { Item, Media, Page, Section } from '@/application/entities';
+import { toMediadomain } from '../../shared/mappers/indext';
+
+import qs from 'qs';
 
 export default class StrapiPagesApiRepository implements PageRepository {
   constructor(
@@ -207,7 +210,6 @@ export default class StrapiPagesApiRepository implements PageRepository {
           facebook
           instagram
           linkedin
-          locale
           whatsapp
           section_pages {
             documentId
@@ -319,32 +321,18 @@ export default class StrapiPagesApiRepository implements PageRepository {
       });
     }
 
-    if (backgroundMedia && backgroundMedia instanceof File) {
-      const mediaId = await this.updateFile({
-        file: backgroundMedia,
-        refId: id,
-        field: 'backgroundMedia',
-        ref: 'api::page.page'
-      });
-
+    if (photoProfile) {
       Object.assign(bodyData, {
-        backgroundMedia: {
-          set: [mediaId]
+        photoProfile: {
+          set: [photoProfile]
         }
       });
     }
 
-    if (photoProfile && photoProfile instanceof File) {
-      const mediaId = await this.updateFile({
-        file: photoProfile,
-        refId: id,
-        field: 'photoProfile',
-        ref: 'api::page.page'
-      });
-
+    if (backgroundMedia) {
       Object.assign(bodyData, {
-        photoProfile: {
-          set: [mediaId]
+        backgroundMedia: {
+          set: [backgroundMedia]
         }
       });
     }
@@ -416,19 +404,30 @@ export default class StrapiPagesApiRepository implements PageRepository {
       link
     };
 
-    if (image && image instanceof File) {
-      const mediaId = await this.updateFile({
-        file: image
-      });
-
+    if (image) {
       Object.assign(bodyData, {
         image: {
-          set: [mediaId]
+          set: [image]
         }
       });
     }
 
-    const result = await this.AxiosClientService.post(`/page-items`, {
+    const query = qs.stringify({
+      populate: {
+        image: {
+          fields: [
+            'documentId',
+            'url',
+            'width',
+            'height',
+            'alternativeText',
+            'mime'
+          ]
+        }
+      }
+    });
+
+    const result = await this.AxiosClientService.post(`/page-items?${query}`, {
       data: bodyData
     });
 
@@ -449,24 +448,35 @@ export default class StrapiPagesApiRepository implements PageRepository {
       type: data.type
     };
 
-    if (data.image && data.image instanceof File) {
-      const mediaId = await this.updateFile({
-        file: data.image,
-        refId: id,
-        field: 'image',
-        ref: 'api::page-items.page-items'
-      });
-
+    if (data.image) {
       Object.assign(bodyData, {
         image: {
-          set: [mediaId]
+          set: [data.image]
         }
       });
     }
 
-    const result = await this.AxiosClientService.put(`/page-items/${id}`, {
-      data: bodyData
+    const query = qs.stringify({
+      populate: {
+        image: {
+          fields: [
+            'documentId',
+            'url',
+            'width',
+            'height',
+            'alternativeText',
+            'mime'
+          ]
+        }
+      }
     });
+
+    const result = await this.AxiosClientService.put(
+      `/page-items/${id}?${query}`,
+      {
+        data: bodyData
+      }
+    );
 
     if (!result?.data) {
       throw new Error('Page not updated');
@@ -478,22 +488,9 @@ export default class StrapiPagesApiRepository implements PageRepository {
     await this.AxiosClientService.delete(`/page-items/${id}`);
   }
 
-  async updateFile({
-    file,
-    refId,
-    field,
-    ref
-  }: {
-    file: File;
-    refId?: string;
-    field?: string;
-    ref?: string;
-  }) {
+  async uploadMedia(media: File): Promise<Media> {
     const uploadFormData = new FormData();
-    uploadFormData.append('files', file);
-    // uploadFormData.append('ref', ref);
-    // uploadFormData.append('refId', refId);
-    // uploadFormData.append('field', field);
+    uploadFormData.append('files', media);
 
     const result: any = await this.AxiosClientService.post(
       '/upload',
@@ -507,6 +504,6 @@ export default class StrapiPagesApiRepository implements PageRepository {
 
     if (!result?.data) throw new Error('Error on upload media !');
 
-    return result.data[0].id;
+    return toMediadomain(result.data[0]);
   }
 }

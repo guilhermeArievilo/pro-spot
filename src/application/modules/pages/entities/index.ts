@@ -38,8 +38,8 @@ export type PageSchema = {
   locationLink?: string;
   whatsapp?: string;
   discord?: string;
-  backgroundMedia?: File;
-  photoProfile?: File;
+  backgroundMedia?: string | number;
+  photoProfile?: string | number;
   items?: string[];
   sections?: string[];
 };
@@ -54,9 +54,9 @@ export type SectionSchema = {
 
 export type ItemSchema = {
   id?: string;
-  title: string;
+  title?: string;
   subtitle?: string;
   link?: string;
-  type: CardType;
-  image?: File;
+  type?: CardType;
+  image?: string | number;
 };

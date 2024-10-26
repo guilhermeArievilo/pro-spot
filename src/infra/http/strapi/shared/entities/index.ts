@@ -5,4 +5,5 @@ export interface StrapiMedia {
   height: number;
   mime: string;
   alternativeText?: string;
+  id: string;
 }

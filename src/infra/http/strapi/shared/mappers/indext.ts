@@ -8,10 +8,11 @@ export function toMediadomain({
   width,
   alternativeText,
   mime,
-  documentId
+  documentId,
+  id
 }: StrapiMedia): Media {
   return {
-    id: documentId,
+    id: id || documentId,
     src: getImageUrl(url),
     height,
     width,

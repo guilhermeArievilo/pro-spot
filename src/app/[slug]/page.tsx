@@ -1,9 +1,12 @@
 import GetPageUsecase from '@/application/modules/pages/usecases/get-page-usecase';
+import GridItems from '@/components/page/grid-items';
 import Section from '@/components/page/section';
+import SlideItems from '@/components/page/slide-items';
 import CardItem from '@/components/ui/card-item';
 import { getClient } from '@/infra/http/apolloService';
 import axiosInstance from '@/infra/http/axiosService';
 import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
+import { groupByType } from '@/lib/utils';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
@@ -24,6 +27,7 @@ export default async function HomePage({ params }: HomePageProps) {
 
   if (!page) return notFound();
 
+  const groups = page.items?.length ? groupByType(page.items) : null;
   return (
     <main className="flex flex-col gap-6">
       <section className="w-full h-screen relative -z-20">
@@ -48,6 +52,21 @@ export default async function HomePage({ params }: HomePageProps) {
             />
           )
         )}
+        <div className="flex flex-col gap-4">
+          {groups?.map((items, index) => {
+            const currentType = items[0].type;
+
+            if (currentType === 'col' || currentType === 'banner') {
+              return (
+                <SlideItems items={items} key={`slide-${page.name}-${index}`} />
+              );
+            }
+
+            return (
+              <GridItems items={items} key={`grid-${page.name}-${index}`} />
+            );
+          })}
+        </div>
         <div className="px-4">
           {page.items?.map(({ id, title, type, image, link, subtitle }) => (
             <CardItem

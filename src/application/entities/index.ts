@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 export const mediaObjectSchema = z.object({
-  id: z.string(),
-  src: z.string(),
-  alt: z.string().optional(),
+  id: z.union([z.string().min(1), z.number()]),
+  src: z.string().min(1),
+  alt: z.string().optional().nullable(),
   width: z.number(),
   height: z.number(),
   mime: z.string().optional()

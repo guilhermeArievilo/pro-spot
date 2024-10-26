@@ -36,7 +36,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Input } from '../ui/input';
-import { CardType } from '@/application/entities';
+import { CardType, Media, mediaObjectSchema } from '@/application/entities';
 import { ItemSchema } from '@/application/modules/pages/entities';
 import { ImageInput } from '../ui/image-input';
 
@@ -46,19 +46,17 @@ const formSchema = z.object({
 
 const formImageSchema = z.object({
   title: z.string().min(1, { message: 'O título é obrigatório' }),
-  image: z
-    .instanceof(File, { message: 'Faça o upload de uma imagem' })
-    .refine((file) => file.type.startsWith('image/'), {
-      message: 'O arquivo deve ser uma imagem'
-    })
+  image: mediaObjectSchema
 });
 
 interface CreateItemRotineProps {
   onCreateAItem: (item: ItemSchema) => void;
+  onUploadMedia: (media: File) => Promise<Media>;
 }
 
 export default function CreateItemRotine({
-  onCreateAItem
+  onCreateAItem,
+  onUploadMedia
 }: CreateItemRotineProps) {
   const [type, setType] = useState<CardType>('banner');
   const [containImage, setContainImage] = useState<boolean>(true);
@@ -78,11 +76,17 @@ export default function CreateItemRotine({
     }
   });
 
-  function initializeAItem({ title, image }: { title: string; image?: File }) {
+  async function uploadImage(photo: File) {
+    const media = await onUploadMedia(photo);
+
+    imageForm.setValue('image', media);
+  }
+
+  function initializeAItem({ title, image }: { title: string; image?: Media }) {
     onCreateAItem({
       title,
       type,
-      image
+      image: image?.id
     });
     if (containImage) {
       imageForm.reset();
@@ -218,9 +222,10 @@ export default function CreateItemRotine({
                       <FormControl>
                         <ImageInput
                           {...field}
-                          value=""
+                          image={field.value}
+                          value={field.value?.src || ''}
                           onChange={(e) => {
-                            field.onChange(e.target.files?.[0]);
+                            uploadImage(e.target.files?.[0]!);
                           }}
                         />
                       </FormControl>

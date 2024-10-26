@@ -14,7 +14,7 @@ import {
 import { Input } from '../ui/input';
 import { Textarea } from '../ui/textarea';
 import { ImageInput } from '../ui/image-input';
-import { Page } from '@/application/entities';
+import { Media, mediaObjectSchema, Page } from '@/application/entities';
 import { Button } from '../ui/button';
 import { SocialInput } from '../ui/social-input';
 import InstagramIcon from '@/assets/svg/icons/instagram.svg';
@@ -25,17 +25,15 @@ import LinkedInIcon from '@/assets/svg/icons/linkedin.svg';
 import PinIcon from '@/assets/svg/icons/map-pin.svg';
 import { useEffect, useState } from 'react';
 import * as _ from 'lodash';
-import { createSlug, getImageURLByFile } from '@/lib/utils';
+import { createSlug } from '@/lib/utils';
 import { PageSchema } from '@/application/modules/pages/entities';
-import { toast } from 'sonner';
 
 interface GeralInfoDataProps {
   page: Page;
   onUpdatePage?: (page: Page) => void;
   onSubmitGeralInfo?: (formData: PageSchema) => void;
+  onUploadMedia: (media: File) => Promise<Media>;
 }
-
-// const fileSchema = z.union([z.string(), z.instanceof(File)]);
 
 const formSchema = z.object({
   name: z.string(),
@@ -45,9 +43,9 @@ const formSchema = z.object({
   whatsapp: z.string().optional(),
   linkedin: z.string().optional(),
   facebook: z.string().optional(),
-  locationLink: z.string().optional()
-  // profilePhoto: fileSchema,
-  // backgroundMedia: fileSchema
+  locationLink: z.string().optional(),
+  photoProfile: mediaObjectSchema,
+  backgroundMedia: mediaObjectSchema
 });
 
 type GeralInfoFormData = z.infer<typeof formSchema>;
@@ -55,11 +53,10 @@ type GeralInfoFormData = z.infer<typeof formSchema>;
 export default function GeralInfoData({
   page,
   onUpdatePage,
-  onSubmitGeralInfo
+  onSubmitGeralInfo,
+  onUploadMedia
 }: GeralInfoDataProps) {
   const [pageBackup, setPageBackup] = useState<Page>();
-  const [profilePhoto, setProfilePhoto] = useState<File>();
-  const [backgroundMedia, setBackgroundMedia] = useState<File>();
   const form = useForm<GeralInfoFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -70,9 +67,9 @@ export default function GeralInfoData({
       whatsapp: page.whatsapp,
       linkedin: page.linkedin,
       facebook: page.facebook,
-      locationLink: page.locationLink
-      // profilePhoto: page.photoProfile.src,
-      // backgroundMedia: page.backgroundMedia.src
+      locationLink: page.locationLink,
+      photoProfile: page.photoProfile,
+      backgroundMedia: page.backgroundMedia
     }
   });
 
@@ -84,6 +81,20 @@ export default function GeralInfoData({
   const linkedinWatcher = form.watch('linkedin');
   const facebookWatcher = form.watch('facebook');
   const locationLinkWatcher = form.watch('locationLink');
+  const profilePhotoWatcher = form.watch('photoProfile');
+  const backgroundMediaWatcher = form.watch('backgroundMedia');
+
+  async function uploadProfilePhoto(photo: File) {
+    const media = await onUploadMedia(photo);
+
+    form.setValue('photoProfile', media);
+  }
+
+  async function uploadBackgroundMedia(image: File) {
+    const media = await onUploadMedia(image);
+
+    form.setValue('backgroundMedia', media);
+  }
 
   const onSubmit = (data: GeralInfoFormData) => {
     const {
@@ -94,46 +105,32 @@ export default function GeralInfoData({
       whatsapp,
       linkedin,
       facebook,
-      locationLink
+      locationLink,
+      photoProfile,
+      backgroundMedia
     } = data;
 
     if (onSubmitGeralInfo) {
       const formData = {
-        id: page.id,
-        slug: createSlug(name),
-        name,
-        content,
-        instagram,
-        x,
-        whatsapp,
-        linkedin,
-        facebook,
-        locationLink
+        slug: name !== pageBackup?.name ? createSlug(name) : undefined,
+        name: name !== pageBackup?.name ? name : undefined,
+        content: content !== pageBackup?.content ? content : undefined,
+        instagram: instagram !== pageBackup?.instagram ? instagram : undefined,
+        x: x !== pageBackup?.x ? x : undefined,
+        whatsapp: whatsapp !== pageBackup?.whatsapp ? whatsapp : undefined,
+        linkedin: linkedin !== pageBackup?.linkedin ? linkedin : undefined,
+        facebook: facebook !== pageBackup?.facebook ? facebook : undefined,
+        locationLink:
+          locationLink !== pageBackup?.locationLink ? locationLink : undefined,
+        photoProfile:
+          photoProfile.id === pageBackup?.photoProfile.id
+            ? undefined
+            : photoProfile.id,
+        backgroundMedia:
+          backgroundMedia.id === pageBackup?.backgroundMedia.id
+            ? undefined
+            : backgroundMedia.id
       };
-
-      if (backgroundMedia instanceof File) {
-        Object.assign(formData, {
-          backgroundMedia
-        });
-      }
-
-      if (profilePhoto instanceof File) {
-        Object.assign(formData, {
-          photoProfile: profilePhoto
-        });
-      }
-
-      if (!backgroundMedia && !page.backgroundMedia) {
-        toast('Você não selecionou uma mídia de fundo', {
-          description: 'Adicione uma mídia de fundo para continuar'
-        });
-      }
-
-      if (!profilePhoto && !page.photoProfile) {
-        toast('Você não selecionou uma imagem de perfil', {
-          description: 'Adicione uma imagem de perfil para continuar'
-        });
-      }
 
       onSubmitGeralInfo(formData);
     }
@@ -152,6 +149,7 @@ export default function GeralInfoData({
 
   useEffect(() => {
     if (onUpdatePage) {
+      console.log(form.getValues());
       onUpdatePage({
         ...page,
         name: nameWatcher,
@@ -162,18 +160,8 @@ export default function GeralInfoData({
         linkedin: linkedinWatcher,
         facebook: facebookWatcher,
         locationLink: locationLinkWatcher,
-        photoProfile: {
-          ...page.photoProfile,
-          src: profilePhoto
-            ? getImageURLByFile(profilePhoto)
-            : page.photoProfile.src
-        },
-        backgroundMedia: {
-          ...page.backgroundMedia,
-          src: backgroundMedia
-            ? getImageURLByFile(backgroundMedia)
-            : page.backgroundMedia.src
-        }
+        photoProfile: profilePhotoWatcher,
+        backgroundMedia: backgroundMediaWatcher
       });
     }
   }, [
@@ -185,8 +173,8 @@ export default function GeralInfoData({
     linkedinWatcher,
     facebookWatcher,
     locationLinkWatcher,
-    profilePhoto,
-    backgroundMedia
+    profilePhotoWatcher,
+    backgroundMediaWatcher
   ]);
 
   useEffect(() => {
@@ -194,23 +182,11 @@ export default function GeralInfoData({
       setPageBackup(_.cloneDeep(page));
     }
   }, []);
-
-  function setFileProfilePhoto(file?: File) {
-    if (file) {
-      setProfilePhoto(file);
-    }
-  }
-
-  function setFileBackgroundMedia(file?: File) {
-    if (file) {
-      setBackgroundMedia(file);
-    }
-  }
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-12">
       <Form {...form}>
         <form>
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-10">
             <div className="flex">
               <span className="text-2xl">Informações Gerais</span>
             </div>
@@ -245,16 +221,18 @@ export default function GeralInfoData({
                 )}
               />
               <FormField
-                name="profilePhoto"
+                control={form.control}
+                name="photoProfile"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
                     <FormLabel>Foto de perfil</FormLabel>
                     <FormControl>
                       <ImageInput
                         {...field}
-                        image={page.photoProfile}
+                        image={field.value}
+                        value={field.value.src}
                         onChange={(e) => {
-                          setFileProfilePhoto(e.target.files?.[0]);
+                          uploadProfilePhoto(e.target.files?.[0]!);
                         }}
                       />
                     </FormControl>
@@ -263,6 +241,7 @@ export default function GeralInfoData({
                 )}
               />
               <FormField
+                control={form.control}
                 name="backgroundMedia"
                 render={({ field }) => (
                   <FormItem className="col-span-2">
@@ -270,9 +249,10 @@ export default function GeralInfoData({
                     <FormControl>
                       <ImageInput
                         {...field}
-                        image={page.backgroundMedia}
+                        image={field.value}
+                        value={field.value.src}
                         onChange={(e) => {
-                          setFileBackgroundMedia(e.target.files?.[0]);
+                          uploadBackgroundMedia(e.target.files?.[0]!);
                         }}
                       />
                     </FormControl>

@@ -1,4 +1,4 @@
-import { Item, Page, Section } from '@/application/entities';
+import { Item, Media, Page, Section } from '@/application/entities';
 import {
   GetPageResponse,
   ItemSchema,
@@ -31,4 +31,5 @@ export default abstract class PageRepository {
   abstract createItem(props: ItemSchema): Promise<Item>;
   abstract updateItem(props: UpdateItemRequest): Promise<void>;
   abstract deleteItem(id: string): Promise<void>;
+  abstract uploadMedia(media: File): Promise<Media>;
 }

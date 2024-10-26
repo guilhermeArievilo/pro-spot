@@ -3,7 +3,6 @@ import { HeaderPage } from '../page/header-page';
 import { Page } from '@/application/entities';
 import Section from '../page/section';
 import FooterPage from '../page/footer-page';
-import CardItem from '../ui/card-item';
 import { groupByType } from '@/lib/utils';
 import SlideItems from '../page/slide-items';
 import GridItems from '../page/grid-items';

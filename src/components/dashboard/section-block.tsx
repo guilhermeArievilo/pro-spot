@@ -1,6 +1,6 @@
 'use client';
 
-import { Item, Section } from '@/application/entities';
+import { Item, Media, Section } from '@/application/entities';
 import {
   Accordion,
   AccordionContent,
@@ -21,12 +21,10 @@ import {
 } from '../ui/form';
 import { Input } from '../ui/input';
 import { RadioGroup, RadioGroupBlockItem } from '../ui/radio-group';
-import PlusIcon from '@/assets/svg/icons/plus.svg';
 import ItemBlock from './item-block';
 
 import AlignStartIcon from '@/assets/svg/icons/align-left.svg';
 import AlignCenterIcon from '@/assets/svg/icons/align-center.svg';
-import ChooseTypeItem from './choose-type-item';
 import { useEffect, useState } from 'react';
 import {
   ItemSchema,
@@ -50,6 +48,7 @@ interface SectionBlockProps {
   onItemSave?: (item: ItemSchema, id: string) => void;
   onCreateItem?: (item: ItemSchema) => void;
   onDeleteItem?: (id: string, title: string) => void;
+  onUploadMedia: (media: File) => Promise<Media>;
 }
 
 export default function SectionBlock({
@@ -59,7 +58,8 @@ export default function SectionBlock({
   onUpdated,
   onItemSave,
   onCreateItem,
-  onDeleteItem
+  onDeleteItem,
+  onUploadMedia
 }: SectionBlockProps) {
   const { id, title, subtitle, alignContent, items } = section;
   const [liveItems, setLiveItems] = useState<Item[]>(items ? items : []);
@@ -232,10 +232,14 @@ export default function SectionBlock({
                       onDeleteItem(id, item.title);
                     }
                   }}
+                  onUploadMedia={onUploadMedia}
                 />
               ))}
               <div className="h-6 w-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
-              <CreateItemRotine onCreateAItem={addItem} />
+              <CreateItemRotine
+                onCreateAItem={addItem}
+                onUploadMedia={onUploadMedia}
+              />
             </div>
             <div className="col-span-4 w-full flex items-center gap-4">
               <Button variant={'outline'} className="flex-1" type="button">

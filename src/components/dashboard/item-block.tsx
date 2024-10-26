@@ -1,4 +1,9 @@
-import { CardType, Item } from '@/application/entities';
+import {
+  CardType,
+  Item,
+  Media,
+  mediaObjectSchema
+} from '@/application/entities';
 import {
   Accordion,
   AccordionContent,
@@ -32,7 +37,8 @@ import PlayIcon from '@/assets/svg/icons/play.svg';
 const formSchema = z.object({
   title: z.string(),
   subtitle: z.string().optional(),
-  link: z.string().optional()
+  link: z.string().optional(),
+  image: mediaObjectSchema.optional()
 });
 
 const typeOptions = [
@@ -50,6 +56,7 @@ interface ItemBlockProps {
   onDelete?: (itemId: string) => void;
   onSave?: (page: ItemSchema) => void;
   onUpdateItem?: (item: Item) => void;
+  onUploadMedia: (media: File) => Promise<Media>;
 }
 
 export default function ItemBlock({
@@ -58,85 +65,58 @@ export default function ItemBlock({
   togglePublish,
   onDelete,
   onSave,
-  onUpdateItem
+  onUpdateItem,
+  onUploadMedia
 }: ItemBlockProps) {
-  const { id, title, subtitle, type, link } = item;
+  const { id, title, subtitle, type, link, image } = item;
   const [typeItem, setTypeItem] = useState<CardType>(type);
   const [itemBackup, setItemBackup] = useState<Item>();
   const [itemPreview, setItemPreview] = useState<Item>(item);
-  const [imageItem, setImageItem] = useState<File>();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title,
       subtitle,
-      link
+      link,
+      image
     }
   });
 
   const titleWatcher = form.watch('title');
   const subtitleWatcher = form.watch('subtitle');
   const linkWatcher = form.watch('link');
+  const imageWatcher = form.watch('image');
+
+  async function uploadImage(photo: File) {
+    const media = await onUploadMedia(photo);
+
+    form.setValue('image', media);
+  }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const { title, subtitle, link } = values;
+    const { title, subtitle, link, image } = values;
 
     if (onSave) {
       const formData = {
-        title,
-        subtitle,
-        link,
-        type: typeItem
+        title: title !== itemBackup?.title ? title : undefined,
+        subtitle: subtitle !== itemBackup?.subtitle ? subtitle : undefined,
+        link: link !== itemBackup?.link ? link : undefined,
+        type: type !== itemBackup?.type ? type : undefined,
+        image: image?.id !== itemBackup?.image?.id ? image?.id : undefined
       };
-
-      if (imageItem instanceof File) {
-        Object.assign(formData, {
-          image: imageItem
-        });
-      }
 
       onSave(formData);
     }
   }
 
-  function setFileImagem(file?: File) {
-    if (file) {
-      setImageItem(file);
-    }
-  }
-
-  function onDeleteImage() {
-    setItemPreview({
-      ...itemPreview,
-      image: undefined
-    });
-  }
-
   useEffect(() => {
-    let image = item.image;
-    if (imageItem) {
-      if (item.image) {
-        image = {
-          ...item.image,
-          src: getImageURLByFile(imageItem)
-        };
-      } else {
-        image = {
-          id: '1',
-          height: 236,
-          width: 166,
-          src: getImageURLByFile(imageItem)
-        };
-      }
-    }
-
     setItemPreview({
       ...item,
       title: titleWatcher,
       subtitle: subtitleWatcher,
       link: linkWatcher,
-      image,
+      image: imageWatcher,
       type: typeItem
     });
 
@@ -146,11 +126,11 @@ export default function ItemBlock({
         title: titleWatcher,
         subtitle: subtitleWatcher,
         link: linkWatcher,
-        image,
+        image: imageWatcher,
         type: typeItem
       });
     }
-  }, [titleWatcher, subtitleWatcher, linkWatcher, imageItem, typeItem]);
+  }, [titleWatcher, subtitleWatcher, linkWatcher, imageWatcher, typeItem]);
 
   useEffect(() => {
     if (!itemBackup) {
@@ -248,18 +228,19 @@ export default function ItemBlock({
                   />
                   <div className="col-span-2">
                     <FormField
+                      control={form.control}
                       name="image"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Imagem</FormLabel>
                           <FormControl>
                             <ImageInput
-                              {...field}
-                              image={itemPreview.image}
                               enableDelete
-                              onDelete={onDeleteImage}
+                              {...field}
+                              image={field.value}
+                              value={field.value?.src || ''}
                               onChange={(e) => {
-                                setFileImagem(e.target.files?.[0]);
+                                uploadImage(e.target.files?.[0]!);
                               }}
                             />
                           </FormControl>
