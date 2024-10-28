@@ -1,7 +1,8 @@
 import {
   GetPageResponse,
   ItemSchema,
-  PageSchema
+  PageSchema,
+  SectionSchema
 } from '@/application/modules/pages/entities';
 import PageRepository, {
   UpdateItemRequest,
@@ -365,6 +366,46 @@ export default class StrapiPagesApiRepository implements PageRepository {
     });
   }
 
+  async createSection({
+    title,
+    subtitle,
+    alignContent
+  }: SectionSchema): Promise<Section> {
+    const data = {
+      title,
+      subtitle,
+      alignContent
+    };
+
+    const query = qs.stringify({
+      populate: {
+        page_items: {
+          fields: [
+            'documentId',
+            'title',
+            'subtitle',
+            'type',
+            'link',
+            'publishedAt'
+          ]
+        }
+      }
+    });
+
+    const result = await this.AxiosClientService.post(
+      `/section-pages?${query}`,
+      {
+        data
+      }
+    );
+
+    if (!result.data) {
+      throw new Error('Section not created');
+    }
+
+    return toSectionPageDomain(result.data.data);
+  }
+
   async updateSection({ id, data }: UpdateSectionRequest): Promise<Section> {
     // /api/section-pages/:id
 
@@ -393,6 +434,10 @@ export default class StrapiPagesApiRepository implements PageRepository {
     }
 
     return toSectionPageDomain(result.data.data);
+  }
+
+  async deleteSection(id: string): Promise<void> {
+    await this.AxiosClientService.delete(`/section-pages/${id}`);
   }
 
   async updatePublishedStateSection(

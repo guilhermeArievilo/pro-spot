@@ -32,6 +32,8 @@ import PublishItemUsecase from '@/application/modules/pages/usecases/publish-ite
 import UnpublishItemUsecase from '@/application/modules/pages/usecases/unpublish-item-usecase';
 import PublishSectionUsecase from '@/application/modules/pages/usecases/publish-section-usecase';
 import UnpublishSectionUsecase from '@/application/modules/pages/usecases/unpublish-section-usecase';
+import CreateSectionUsecase from '@/application/modules/pages/usecases/create-section-usecase';
+import DeleteSectionUsecase from '@/application/modules/pages/usecases/delete-section-usecase';
 
 const navigationMenuPage = [
   {
@@ -134,6 +136,53 @@ export default function ShowPage() {
     }
   }
 
+  async function createSection(section: SectionSchema) {
+    const createSectionCase = new CreateSectionUsecase(pagesRepository);
+    const updatePageCase = new UpdatePageUsecase(pagesRepository);
+
+    await createSectionCase
+      .execute(section)
+      .then(async (section) => {
+        const sections = currentPage?.sectionsPages || [];
+        sections.push(section);
+
+        if (currentPage) {
+          await updatePageCase
+            .execute({
+              id: currentPage.id,
+              data: {
+                sections: sections.map((currentSection) => currentSection.id)
+              }
+            })
+            .then(() => {
+              setCurrentPage((prev) => {
+                return prev
+                  ? {
+                      ...prev,
+                      sectionsPages: sections
+                    }
+                  : prev;
+              });
+
+              toast('Ôba, você criou uma nova secção');
+            })
+            .catch((e) => {
+              console.error(e);
+              toast('Ops, tivemos um problema', {
+                description:
+                  'Por algum motivo não conseguimos atualizar sua página'
+              });
+            });
+        }
+      })
+      .catch((e) => {
+        console.error(e);
+        toast('Ops, tivemos um problema', {
+          description: 'Não conseguimos cria sua secção.'
+        });
+      });
+  }
+
   async function updateSection(section: SectionSchema, id: string) {
     const updateSectionCase = new UpdateSectionUsecase(pagesRepository);
 
@@ -150,6 +199,42 @@ export default function ShowPage() {
     toast('Ops, tivemos um problema', {
       description: 'Tente em alguns estantes'
     });
+  }
+
+  async function deleteSection(sectionId: string) {
+    if (!currentPage?.sectionsPages?.length) return;
+    const { sectionsPages: sections } = currentPage;
+
+    const sectionIndex = sections.findIndex(
+      (currentSection) => currentSection.id === sectionId
+    );
+
+    const deleteSectionCase = new DeleteSectionUsecase(pagesRepository);
+
+    await deleteSectionCase
+      .execute(sectionId)
+      .then(() => {
+        setCurrentPage((prev) => {
+          return prev
+            ? {
+                ...prev,
+                sectionsPages:
+                  sectionIndex > -1 && sectionIndex === 0
+                    ? undefined
+                    : prev.sectionsPages?.filter(
+                        (currentSection) => currentSection.id !== sectionId
+                      )
+              }
+            : prev;
+        });
+        toast('Pronto, sua secção foi excluida.');
+      })
+      .catch((e) => {
+        console.error(e);
+        toast('Ops, tivemos um problema', {
+          description: 'Não conseguimos excluir sua secção.'
+        });
+      });
   }
 
   async function handlerPublishSection(section: Section) {
@@ -550,6 +635,13 @@ export default function ShowPage() {
     ) {
       await deleteItem(confirmActionData.recordId, confirmActionData.sectionId);
     }
+
+    if (
+      confirmActionData.onConfirmRef === 'section' &&
+      confirmActionData.recordId
+    ) {
+      await deleteSection(confirmActionData.recordId);
+    }
   }
 
   useEffect(() => {
@@ -594,7 +686,7 @@ export default function ShowPage() {
             <div className="w-full flex flex-col gap-16 pb-4">
               <div className="flex flex-col items-center gap-4">
                 <span className="text-2xl w-full">Secções</span>
-                <div className="w-full">
+                <div className="w-full flex flex-col gap-6">
                   {currentPage?.sectionsPages?.map((section, index) => (
                     <SectionBlock
                       key={section.id}
@@ -628,13 +720,23 @@ export default function ShowPage() {
                           ? handlerUnpublishSection(currentSection)
                           : handlerPublishSection(currentSection);
                       }}
+                      onDelete={(id) => {
+                        setConfirmActionData({
+                          open: true,
+                          description:
+                            'Tem certeza que deseja excluir esta secção ?',
+                          title: `Você está excluindo a secção "${section.title}"`,
+                          onConfirmRef: 'section',
+                          recordId: id
+                        });
+                      }}
                     />
                   ))}
                 </div>
                 {!!currentPage.sectionsPages?.length && (
                   <div className="h-6 w-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
                 )}
-                <CreateSectionEntry onCreateASection={() => {}} />
+                <CreateSectionEntry onCreateASection={createSection} />
               </div>
               <div className="flex flex-col items-center gap-4">
                 <span className="text-2xl w-full">Itens Avulsos</span>
