@@ -32,6 +32,10 @@ import {
 } from '@/application/modules/pages/entities';
 import CreateItemRotine from './choose-type-item';
 
+import TrashIcon from '@/assets/svg/icons/trash.svg';
+import PlayIcon from '@/assets/svg/icons/play.svg';
+import PauseIcon from '@/assets/svg/icons/pause.svg';
+
 const formSchema = z.object({
   title: z.string(),
   subtitle: z.string().optional(),
@@ -41,7 +45,7 @@ const formSchema = z.object({
 interface SectionBlockProps {
   section: Section;
   open?: boolean;
-  togglePublish?: (sectionId: string) => void;
+  togglePublish?: (section: Section) => void;
   togglePublishItem?: (item: Item) => void;
   onDelete?: (sectionId: string) => void;
   onSave?: (page: SectionSchema) => void;
@@ -61,7 +65,9 @@ export default function SectionBlock({
   onCreateItem,
   onDeleteItem,
   onUploadMedia,
-  togglePublishItem
+  togglePublishItem,
+  togglePublish,
+  onDelete
 }: SectionBlockProps) {
   const { id, title, subtitle, alignContent, items } = section;
   const [liveItems, setLiveItems] = useState<Item[]>(items ? items : []);
@@ -132,8 +138,30 @@ export default function SectionBlock({
       <Accordion type="single" collapsible>
         <AccordionItem
           value={id}
-          className="p-4 dark:bg-dark-surfaceContainerLowest bg-light-surbg-dark-surfaceContainerLowest border-0 rounded-2xl w-full"
+          className="relative p-4 dark:bg-dark-surfaceContainerLowest bg-light-surbg-dark-surfaceContainerLowest border-0 rounded-2xl w-full"
         >
+          <div className="flex absolute top-2 right-12 gap-2">
+            {togglePublish && (
+              <Button
+                variant={'ghost'}
+                type="button"
+                className="p-2"
+                onClick={() => togglePublish(section)}
+              >
+                {section.publishedAt ? <PauseIcon /> : <PlayIcon />}
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant={'ghost'}
+                type="button"
+                className="p-2"
+                onClick={() => onDelete(id)}
+              >
+                <TrashIcon />
+              </Button>
+            )}
+          </div>
           <AccordionTrigger className="py-0 pb-4 text-base text-start">
             {title}
           </AccordionTrigger>

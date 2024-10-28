@@ -30,6 +30,8 @@ import CreateSectionEntry from '@/components/dashboard/create-section-entry';
 import UploadMediaUsecase from '@/application/modules/pages/usecases/upload-media-usecase';
 import PublishItemUsecase from '@/application/modules/pages/usecases/publish-item-usecase';
 import UnpublishItemUsecase from '@/application/modules/pages/usecases/unpublish-item-usecase';
+import PublishSectionUsecase from '@/application/modules/pages/usecases/publish-section-usecase';
+import UnpublishSectionUsecase from '@/application/modules/pages/usecases/unpublish-section-usecase';
 
 const navigationMenuPage = [
   {
@@ -150,9 +152,72 @@ export default function ShowPage() {
     });
   }
 
+  async function handlerPublishSection(section: Section) {
+    const publishSectionCase = new PublishSectionUsecase(pagesRepository);
+
+    await publishSectionCase
+      .execute(section.id)
+      .then((res) => {
+        toast(`A secção ${section.title} foi publicado !`);
+        setCurrentPage((prev) => {
+          return prev
+            ? {
+                ...prev,
+                sectionsPages: prev?.sectionsPages?.map((mapSection) => {
+                  if (section.id === mapSection.id) {
+                    return {
+                      ...mapSection,
+                      publishedAt: res.publishedAt
+                    };
+                  }
+                  return mapSection;
+                })
+              }
+            : prev;
+        });
+      })
+      .catch((e) => {
+        console.error(e.message);
+        toast('Ops, tivemos um problema', {
+          description: `Não foi possível publicar a secção ${section.title}`
+        });
+      });
+  }
+
+  async function handlerUnpublishSection(section: Section) {
+    const unpublishSectionCase = new UnpublishSectionUsecase(pagesRepository);
+
+    await unpublishSectionCase
+      .execute(section.id)
+      .then((res) => {
+        toast(`A secção ${section.title} foi despublicada !`);
+        setCurrentPage((prev) => {
+          return prev
+            ? {
+                ...prev,
+                sectionsPages: prev?.sectionsPages?.map((mapSection) => {
+                  if (section.id === mapSection.id) {
+                    return {
+                      ...mapSection,
+                      publishedAt: res.publishedAt
+                    };
+                  }
+                  return mapSection;
+                })
+              }
+            : prev;
+        });
+      })
+      .catch((e) => {
+        console.error(e.message);
+        toast('Ops, tivemos um problema', {
+          description: `Não foi possível despublicar o item ${section.title}`
+        });
+      });
+  }
+
   async function updateItem(item: ItemSchema, id: string) {
     const updateItemCase = new UpdateItemUsecase(pagesRepository);
-    debugger;
 
     const result = await updateItemCase.execute({
       id,
@@ -557,6 +622,11 @@ export default function ShowPage() {
                         item.publishedAt
                           ? handlerUnpublishItem(item, section.id)
                           : handlerPublishItem(item, section.id);
+                      }}
+                      togglePublish={(currentSection) => {
+                        currentSection.publishedAt
+                          ? handlerUnpublishSection(currentSection)
+                          : handlerPublishSection(currentSection);
                       }}
                     />
                   ))}

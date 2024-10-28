@@ -2,8 +2,7 @@ import {
   CardType,
   Item,
   Media,
-  mediaObjectSchema,
-  StateItem
+  mediaObjectSchema
 } from '@/application/entities';
 import {
   Accordion,
@@ -11,7 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '../ui/accordion';
-import { object, z } from 'zod';
+import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '../ui/button';
@@ -30,7 +29,7 @@ import { ImageInput } from '../ui/image-input';
 import CarouselSelect from '../ui/carousel-select';
 import { useEffect, useState } from 'react';
 import * as _ from 'lodash';
-import { cn, getImageURLByFile } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { ItemSchema } from '@/application/modules/pages/entities';
 import TrashIcon from '@/assets/svg/icons/trash.svg';
 import PlayIcon from '@/assets/svg/icons/play.svg';
@@ -147,30 +146,26 @@ export default function ItemBlock({
           className="relative p-4 dark:bg-dark-surfaceContainerLow/50 bg-light-surfaceContainerLow/40 border-0 rounded-2xl w-full"
         >
           <div className="flex absolute top-2 right-12 gap-2">
-            <Button
-              variant={'ghost'}
-              type="button"
-              className="p-2"
-              onClick={() => {
-                if (togglePublish) {
-                  togglePublish(item);
-                }
-              }}
-            >
-              {item.publishedAt ? <PauseIcon /> : <PlayIcon />}
-            </Button>
-            <Button
-              variant={'ghost'}
-              type="button"
-              className="p-2"
-              onClick={() => {
-                if (onDelete) {
-                  onDelete(id);
-                }
-              }}
-            >
-              <TrashIcon />
-            </Button>
+            {togglePublish && (
+              <Button
+                variant={'ghost'}
+                type="button"
+                className="p-2"
+                onClick={() => togglePublish(item)}
+              >
+                {item.publishedAt ? <PauseIcon /> : <PlayIcon />}
+              </Button>
+            )}
+            {onDelete && (
+              <Button
+                variant={'ghost'}
+                type="button"
+                className="p-2"
+                onClick={() => onDelete(id)}
+              >
+                <TrashIcon />
+              </Button>
+            )}
           </div>
           <AccordionTrigger className="py-0 pb-4 text-base text-start flex justify-between">
             {title}

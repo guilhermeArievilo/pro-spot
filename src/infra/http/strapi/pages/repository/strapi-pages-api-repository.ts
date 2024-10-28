@@ -395,6 +395,17 @@ export default class StrapiPagesApiRepository implements PageRepository {
     return toSectionPageDomain(result.data.data);
   }
 
+  async updatePublishedStateSection(
+    id: string,
+    state: Date | null
+  ): Promise<void> {
+    await this.AxiosClientService.put(`/section-pages/${id}`, {
+      data: {
+        publishedAt: state
+      }
+    });
+  }
+
   async createItem({
     title,
     type,

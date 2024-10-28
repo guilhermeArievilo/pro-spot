@@ -35,5 +35,9 @@ export default abstract class PageRepository {
     id: string,
     state: Date | null
   ): Promise<void>;
+  abstract updatePublishedStateSection(
+    id: string,
+    state: Date | null
+  ): Promise<void>;
   abstract uploadMedia(media: File): Promise<Media>;
 }

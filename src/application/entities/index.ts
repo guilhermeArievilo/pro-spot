@@ -33,6 +33,7 @@ export type Section = {
   subtitle?: string;
   alignContent: AlignContent;
   items?: Item[];
+  publishedAt: Date | null;
 };
 
 export type Page = {

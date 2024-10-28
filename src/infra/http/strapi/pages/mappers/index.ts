@@ -33,6 +33,7 @@ interface Sectionpage {
   subtitle: null | string;
   alignContent: AlignContent;
   page_items: Pageitem[];
+  publishedAt: Date | null;
 }
 
 interface Pageitem {
@@ -86,14 +87,16 @@ export function toSectionPageDomain({
   title,
   alignContent,
   subtitle,
-  page_items
+  page_items,
+  publishedAt
 }: Sectionpage): Section {
   return {
     id: documentId,
     title,
     subtitle: subtitle ? subtitle : undefined,
     alignContent,
-    items: page_items?.map(toPageItemDomain)
+    items: page_items?.map(toPageItemDomain),
+    publishedAt
   };
 }
 
