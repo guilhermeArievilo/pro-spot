@@ -31,5 +31,9 @@ export default abstract class PageRepository {
   abstract createItem(props: ItemSchema): Promise<Item>;
   abstract updateItem(props: UpdateItemRequest): Promise<void>;
   abstract deleteItem(id: string): Promise<void>;
+  abstract updatePublishedStateItem(
+    id: string,
+    state: Date | null
+  ): Promise<void>;
   abstract uploadMedia(media: File): Promise<Media>;
 }

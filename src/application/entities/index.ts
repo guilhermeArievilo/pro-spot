@@ -18,7 +18,10 @@ export type Item = {
   link?: string;
   type: CardType;
   image?: Media;
+  publishedAt: Date | null;
 };
+
+export type StateItem = 'publish' | 'draft';
 
 export type CardType = 'row' | 'col' | 'banner' | 'showcase' | 'button';
 

@@ -34,6 +34,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
         slug
         documentId
         content
+        publishedAt
         photoProfile {
           documentId
           url
@@ -77,6 +78,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
             title
             type
             updatedAt
+            publishedAt
           }
           title
           subtitle
@@ -99,8 +101,8 @@ export default class StrapiPagesApiRepository implements PageRepository {
           title
           type
           updatedAt
+          publishedAt
         }
-        publishedAt
       }
     }
   `;
@@ -140,6 +142,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
             whatsapp
             x
             updatedAt
+            publishedAt
             backgroundMedia {
               documentId
               url
@@ -191,6 +194,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
           content
           documentId
           slug
+          publishedAt
           backgroundMedia {
             documentId
             url
@@ -230,6 +234,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
                 width
               }
             }
+            publishedAt
           }
           page_items {
             title
@@ -244,6 +249,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
               url
               width
             }
+            publishedAt
           }
         }
       }
@@ -481,6 +487,17 @@ export default class StrapiPagesApiRepository implements PageRepository {
     if (!result?.data) {
       throw new Error('Page not updated');
     }
+  }
+
+  async updatePublishedStateItem(
+    id: string,
+    state: Date | null
+  ): Promise<void> {
+    await this.AxiosClientService.put(`/page-items/${id}`, {
+      data: {
+        publishedAt: state
+      }
+    });
   }
 
   async deleteItem(id: string): Promise<void> {

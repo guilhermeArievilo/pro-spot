@@ -28,6 +28,8 @@ import CreateSectionItemUsecase from '@/application/modules/pages/usecases/creat
 import ConfirmAction from '@/components/dashboard/confirm-action';
 import CreateSectionEntry from '@/components/dashboard/create-section-entry';
 import UploadMediaUsecase from '@/application/modules/pages/usecases/upload-media-usecase';
+import PublishItemUsecase from '@/application/modules/pages/usecases/publish-item-usecase';
+import UnpublishItemUsecase from '@/application/modules/pages/usecases/unpublish-item-usecase';
 
 const navigationMenuPage = [
   {
@@ -350,8 +352,130 @@ export default function ShowPage() {
           });
         });
 
-      toast(`O item foi excluído!"`);
+      toast(`O item foi excluído!`);
     }
+  }
+
+  async function handlerPublishItem(item: Item, sectionId?: string) {
+    const publishItemCase = new PublishItemUsecase(pagesRepository);
+
+    await publishItemCase
+      .execute(item.id)
+      .then((res) => {
+        toast(`O item ${item.title} foi publicado !`);
+        if (sectionId) {
+          setCurrentPage((prev) => {
+            return prev
+              ? {
+                  ...prev,
+                  sectionsPages: prev.sectionsPages?.map((currentSection) => {
+                    if (currentSection.id === sectionId) {
+                      return {
+                        ...currentSection,
+                        items: currentSection.items?.map(
+                          (currentSectionItem) => {
+                            if (currentSectionItem.id === item.id) {
+                              return {
+                                ...currentSectionItem,
+                                publishedAt: res.publishedAt
+                              };
+                            }
+                            return currentSectionItem;
+                          }
+                        )
+                      };
+                    }
+                    return currentSection;
+                  })
+                }
+              : prev;
+          });
+          return;
+        }
+        setCurrentPage((prev) => {
+          return prev
+            ? {
+                ...prev,
+                items: prev?.items?.map((mapItem) => {
+                  if (item.id === mapItem.id) {
+                    return {
+                      ...mapItem,
+                      publishedAt: res.publishedAt
+                    };
+                  }
+                  return mapItem;
+                })
+              }
+            : prev;
+        });
+      })
+      .catch((e) => {
+        console.error(e.message);
+        toast('Ops, tivemos um problema', {
+          description: `Não foi possível publicar o item ${item.title}`
+        });
+      });
+  }
+
+  async function handlerUnpublishItem(item: Item, sectionId?: string) {
+    const unpublishItemCase = new UnpublishItemUsecase(pagesRepository);
+
+    await unpublishItemCase
+      .execute(item.id)
+      .then((res) => {
+        toast(`O item ${item.title} foi despublicado !`);
+        if (sectionId) {
+          setCurrentPage((prev) => {
+            return prev
+              ? {
+                  ...prev,
+                  sectionsPages: prev.sectionsPages?.map((currentSection) => {
+                    if (currentSection.id === sectionId) {
+                      return {
+                        ...currentSection,
+                        items: currentSection.items?.map(
+                          (currentSectionItem) => {
+                            if (currentSectionItem.id === item.id) {
+                              return {
+                                ...currentSectionItem,
+                                publishedAt: res.publishedAt
+                              };
+                            }
+                            return currentSectionItem;
+                          }
+                        )
+                      };
+                    }
+                    return currentSection;
+                  })
+                }
+              : prev;
+          });
+          return;
+        }
+        setCurrentPage((prev) => {
+          return prev
+            ? {
+                ...prev,
+                items: prev?.items?.map((mapItem) => {
+                  if (item.id === mapItem.id) {
+                    return {
+                      ...mapItem,
+                      publishedAt: res.publishedAt
+                    };
+                  }
+                  return mapItem;
+                })
+              }
+            : prev;
+        });
+      })
+      .catch((e) => {
+        console.error(e.message);
+        toast('Ops, tivemos um problema', {
+          description: `Não foi possível despublicar o item ${item.title}`
+        });
+      });
   }
 
   async function onDeleteConfirmation() {
@@ -429,6 +553,11 @@ export default function ShowPage() {
                         });
                       }}
                       onUploadMedia={uploadMedia}
+                      togglePublishItem={(item) => {
+                        item.publishedAt
+                          ? handlerUnpublishItem(item, section.id)
+                          : handlerPublishItem(item, section.id);
+                      }}
                     />
                   ))}
                 </div>
@@ -457,6 +586,11 @@ export default function ShowPage() {
                         });
                       }}
                       onUploadMedia={uploadMedia}
+                      togglePublish={(currentItem) => {
+                        currentItem.publishedAt
+                          ? handlerUnpublishItem(currentItem)
+                          : handlerPublishItem(currentItem);
+                      }}
                     />
                   ))}
                 </div>

@@ -42,6 +42,7 @@ interface Pageitem {
   documentId: string;
   type: CardType;
   image: StrapiMedia | null;
+  publishedAt: Date | null;
 }
 
 export function toPageDomain({
@@ -102,7 +103,8 @@ export function toPageItemDomain({
   subtitle,
   image,
   link,
-  type
+  type,
+  publishedAt
 }: Pageitem): Item {
   return {
     id: documentId,
@@ -110,6 +112,7 @@ export function toPageItemDomain({
     subtitle: subtitle ? subtitle : undefined,
     image: image ? toMediadomain(image) : undefined,
     type: type,
-    link: link ? link : undefined
+    link: link ? link : undefined,
+    publishedAt
   };
 }

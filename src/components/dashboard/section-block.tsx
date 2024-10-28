@@ -42,6 +42,7 @@ interface SectionBlockProps {
   section: Section;
   open?: boolean;
   togglePublish?: (sectionId: string) => void;
+  togglePublishItem?: (item: Item) => void;
   onDelete?: (sectionId: string) => void;
   onSave?: (page: SectionSchema) => void;
   onUpdated?: (section: Section) => void;
@@ -59,7 +60,8 @@ export default function SectionBlock({
   onItemSave,
   onCreateItem,
   onDeleteItem,
-  onUploadMedia
+  onUploadMedia,
+  togglePublishItem
 }: SectionBlockProps) {
   const { id, title, subtitle, alignContent, items } = section;
   const [liveItems, setLiveItems] = useState<Item[]>(items ? items : []);
@@ -233,6 +235,7 @@ export default function SectionBlock({
                     }
                   }}
                   onUploadMedia={onUploadMedia}
+                  togglePublish={togglePublishItem}
                 />
               ))}
               <div className="h-6 w-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />

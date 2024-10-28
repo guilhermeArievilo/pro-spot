@@ -2,7 +2,8 @@ import {
   CardType,
   Item,
   Media,
-  mediaObjectSchema
+  mediaObjectSchema,
+  StateItem
 } from '@/application/entities';
 import {
   Accordion,
@@ -33,6 +34,7 @@ import { cn, getImageURLByFile } from '@/lib/utils';
 import { ItemSchema } from '@/application/modules/pages/entities';
 import TrashIcon from '@/assets/svg/icons/trash.svg';
 import PlayIcon from '@/assets/svg/icons/play.svg';
+import PauseIcon from '@/assets/svg/icons/pause.svg';
 
 const formSchema = z.object({
   title: z.string(),
@@ -52,7 +54,7 @@ const typeOptions = [
 interface ItemBlockProps {
   item: Item;
   open?: boolean;
-  togglePublish?: (itemId: string) => void;
+  togglePublish?: (item: Item) => void;
   onDelete?: (itemId: string) => void;
   onSave?: (page: ItemSchema) => void;
   onUpdateItem?: (item: Item) => void;
@@ -145,8 +147,17 @@ export default function ItemBlock({
           className="relative p-4 dark:bg-dark-surfaceContainerLow/50 bg-light-surfaceContainerLow/40 border-0 rounded-2xl w-full"
         >
           <div className="flex absolute top-2 right-12 gap-2">
-            <Button variant={'ghost'} type="button" className="p-2">
-              <PlayIcon />
+            <Button
+              variant={'ghost'}
+              type="button"
+              className="p-2"
+              onClick={() => {
+                if (togglePublish) {
+                  togglePublish(item);
+                }
+              }}
+            >
+              {item.publishedAt ? <PauseIcon /> : <PlayIcon />}
             </Button>
             <Button
               variant={'ghost'}
