@@ -31,7 +31,7 @@ export default function FooterPage({
   facebook
 }: FooterPageProps) {
   return (
-    <footer className="absolute bottom-0 left-0 w-full z-30 flex flex-col gap-2 justify-center items-center pb-2 pt-24 dark:bg-gradient-to-b from-transparent to-background">
+    <footer className="absolute bottom-0 left-0 w-full z-30 flex flex-col gap-2 justify-center items-center pb-2 pt-10">
       <div className="flex justify-center items-center gap-2 p-2 bg-light-surfaceContainer/60 dark:bg-dark-surfaceContainerLowest/60 rounded-full backdrop-blur-sm">
         {instagram && (
           <Button className="rounded-full" asChild>
@@ -83,11 +83,11 @@ export default function FooterPage({
           </Button>
         )}
       </div>
-      <div className="flex justify-center items-center gap-1 text-light-onSurfaceVariant dark:text-dark-onSurfaceVariant opacity-40">
+      {/* <div className="flex justify-center items-center gap-1 text-light-onSurfaceVariant dark:text-dark-onSurfaceVariant opacity-40">
         <span className="text-xs">built with</span>
         <FooterLogo className="w-6 dark:fill-dark-onSurfaceVariant fill-light-onSurfaceVariant" />
         <span className="text-xs">ProSpot</span>
-      </div>
+      </div> */}
     </footer>
   );
 }

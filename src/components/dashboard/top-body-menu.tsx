@@ -1,13 +1,21 @@
 import { Button } from '../ui/button';
 import ShareIcon from '@/assets/svg/icons/share.svg';
-import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { RadioGroup, RadioGroupBlockItem } from '../ui/radio-group';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '../ui/dropdown-menu';
 
 interface TopBodyMenuProps {
   pageName: string;
   views: number;
   clicks: number;
-  onSharedPress: () => void;
+  onSharedPress: (option: 'card' | 'QRCode' | 'copyLinkPage') => void;
   options: {
     label: string;
     value: string;
@@ -52,14 +60,36 @@ export default function TopBodyMenu({
         </div>
         <div className="flex gap-2">
           <span className="text-4xl pt-2">{pageName}</span>
-          <Button
-            type="button"
-            variant={'ghost'}
-            onClick={onSharedPress}
-            className="rounded-full h-fit w-fit"
-          >
-            <ShareIcon className="stroke-foreground w-4 h-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                type="button"
+                variant={'ghost'}
+                className="rounded-full h-fit w-fit"
+              >
+                <ShareIcon className="stroke-foreground w-4 h-4" />
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuLabel className="flex items-center gap-2">
+                <ShareIcon className="stroke-foreground w-4 h-4" />
+                Compartilhar
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuGroup>
+                <DropdownMenuItem onClick={() => onSharedPress('card')}>
+                  Card
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onSharedPress('QRCode')}>
+                  Qr Code
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => onSharedPress('copyLinkPage')}>
+                  Link
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>

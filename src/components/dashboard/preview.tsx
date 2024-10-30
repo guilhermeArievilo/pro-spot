@@ -19,7 +19,7 @@ export default function Preview({ page }: PreviewProps) {
       <HeaderPage name={page.name} profileImage={page.photoProfile} />
       <div className="h-full overflow-y-scroll">
         <div className="w-full flex flex-col gap-6">
-          <section className="w-full h-[640px] relative -z-20">
+          <section className="w-full aspect-[3/4] relative -z-20">
             <Image
               src={page.backgroundMedia.src}
               width={page.backgroundMedia.width}
@@ -30,7 +30,7 @@ export default function Preview({ page }: PreviewProps) {
             />
             <div className="absolute w-full h-2/5 bottom-0 left-0 bg-gradient-to-b from-transparent to-background" />
           </section>
-          <div className="-translate-y-48 flex flex-col gap-12">
+          <div className="-translate-y-24 flex flex-col gap-12">
             {page.sectionsPages?.map(
               ({ id, title, subtitle, alignContent, items }) => (
                 <Section

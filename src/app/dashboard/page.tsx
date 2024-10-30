@@ -34,6 +34,11 @@ import PublishSectionUsecase from '@/application/modules/pages/usecases/publish-
 import UnpublishSectionUsecase from '@/application/modules/pages/usecases/unpublish-section-usecase';
 import CreateSectionUsecase from '@/application/modules/pages/usecases/create-section-usecase';
 import DeleteSectionUsecase from '@/application/modules/pages/usecases/delete-section-usecase';
+import QRCodeStyling from 'qr-code-styling';
+import { themeColors } from '@/theme/color';
+import CardDialog from '@/components/dashboard/CardDialog';
+
+const BASEURL = process.env.NEXT_PUBLIC_URL;
 
 const navigationMenuPage = [
   {
@@ -64,6 +69,8 @@ export default function ShowPage() {
       onConfirmRef: 'item',
       recordId: ''
     });
+  const [cardDialogOpen, setCardDialogOpen] = useState(false);
+  const [qrCode, setQrCode] = useState<QRCodeStyling | null>(null);
   const [currentTab, setCurrentTab] = useState<string>(
     navigationMenuPage[0].value
   );
@@ -644,6 +651,51 @@ export default function ShowPage() {
     }
   }
 
+  async function sharePage(option: 'card' | 'QRCode' | 'copyLinkPage') {
+    if (!currentPage) return;
+    const url = `${BASEURL}/${currentPage.slug}`;
+    switch (option) {
+      case 'card':
+        const qrCodeCard = new QRCodeStyling({
+          width: 160,
+          height: 160,
+          data: url,
+          dotsOptions: {
+            color: themeColors.dark.onSurface,
+            type: 'square'
+          },
+          backgroundOptions: {
+            color: themeColors.dark.surfaceContainerLowest
+          }
+        });
+
+        setQrCode(qrCodeCard);
+        setCardDialogOpen(true);
+        break;
+      case 'QRCode':
+        const qrCode = new QRCodeStyling({
+          width: 300,
+          height: 300,
+          data: url,
+          dotsOptions: {
+            color: themeColors.dark.onSurface,
+            type: 'square'
+          },
+          backgroundOptions: {
+            color: themeColors.dark.scrim
+          }
+        });
+        qrCode.download({ extension: 'png', name: currentPage.name });
+        break;
+      default:
+        await navigator.clipboard.writeText(url).then(() => {
+          toast(`O link da página foi copiado para sua área de transferência`, {
+            description: `Seu link: ${url}`
+          });
+        });
+    }
+  }
+
   useEffect(() => {
     if (pageSelected) {
       fetchPageById(pageSelected.id as string);
@@ -664,7 +716,7 @@ export default function ShowPage() {
             pageName={currentPage.name}
             clicks={300}
             views={1000}
-            onSharedPress={() => {}}
+            onSharedPress={sharePage}
             options={navigationMenuPage}
             defaultOption={navigationMenuPage[0].value}
             onOptionChange={(opionValue) => {
@@ -801,6 +853,16 @@ export default function ShowPage() {
         }}
         onConfirm={onDeleteConfirmation}
       />
+      {currentPage && (
+        <CardDialog
+          page={currentPage}
+          key={currentPage.id}
+          open={cardDialogOpen}
+          onChangeOpen={(isOpen) => setCardDialogOpen(isOpen)}
+          qrCode={qrCode}
+          baseUrl={BASEURL || ''}
+        />
+      )}
     </main>
   );
 }
