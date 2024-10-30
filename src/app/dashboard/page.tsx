@@ -783,6 +783,8 @@ export default function ShowPage() {
               onUpdatePage={setCurrentPage}
               onSubmitGeralInfo={updateCurrentPage}
               onUploadMedia={uploadMedia}
+              onDelete={() => {}}
+              togglePublish={() => {}}
             />
           )}
         </div>

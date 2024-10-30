@@ -23,6 +23,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { PageSchema } from '../../entities';
+import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
+import { GraphQlClient } from '@/infra/http/onClientApolloService';
+import axiosInstance from '@/infra/http/axiosService';
+import GetPageUsecase from '../../usecases/get-page-usecase';
+import { createSlug } from '@/lib/utils';
 
 interface CreatePageScreenProps {
   open: boolean;
@@ -32,7 +37,25 @@ interface CreatePageScreenProps {
 }
 
 const formSchema = z.object({
-  name: z.string(),
+  name: z
+    .string()
+    .min(1, 'O nome é obrigatório')
+    .refine(
+      async (nome) => {
+        const pagesRepository = new StrapiPagesApiRepository(
+          GraphQlClient,
+          axiosInstance
+        );
+        const getPageBySlugCase = new GetPageUsecase(pagesRepository);
+
+        const page = await getPageBySlugCase.execute(createSlug(nome));
+
+        return !page;
+      },
+      {
+        message: 'Já existe uma página com esse nome'
+      }
+    ),
   content: z.string(),
   photoProfile: mediaObjectSchema,
   backgroundMedia: mediaObjectSchema

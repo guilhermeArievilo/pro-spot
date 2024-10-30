@@ -53,4 +53,5 @@ export type Page = {
   discord?: string;
   sectionsPages?: Section[];
   items?: Item[];
+  publishedAt: Date | null;
 };

@@ -27,16 +27,42 @@ import { useEffect, useState } from 'react';
 import * as _ from 'lodash';
 import { createSlug } from '@/lib/utils';
 import { PageSchema } from '@/application/modules/pages/entities';
-
+import GetPageUsecase from '@/application/modules/pages/usecases/get-page-usecase';
+import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
+import axiosInstance from '@/infra/http/axiosService';
+import { GraphQlClient } from '@/infra/http/onClientApolloService';
+import PlayIcon from '@/assets/svg/icons/play.svg';
+import PauseIcon from '@/assets/svg/icons/pause.svg';
+import TrashIcon from '@/assets/svg/icons/trash.svg';
 interface GeralInfoDataProps {
   page: Page;
   onUpdatePage?: (page: Page) => void;
   onSubmitGeralInfo?: (formData: PageSchema) => void;
   onUploadMedia: (media: File) => Promise<Media>;
+  togglePublish?: (page: Page) => void;
+  onDelete?: (pageId: string) => void;
 }
 
 const formSchema = z.object({
-  name: z.string(),
+  name: z
+    .string()
+    .min(1, 'O nome é obrigatório')
+    .refine(
+      async (nome) => {
+        const pagesRepository = new StrapiPagesApiRepository(
+          GraphQlClient,
+          axiosInstance
+        );
+        const getPageBySlugCase = new GetPageUsecase(pagesRepository);
+
+        const page = await getPageBySlugCase.execute(createSlug(nome));
+
+        return !page;
+      },
+      {
+        message: 'Já existe uma página com esse nome'
+      }
+    ),
   content: z.string(),
   instagram: z.string().optional(),
   x: z.string().optional(),
@@ -54,7 +80,9 @@ export default function GeralInfoData({
   page,
   onUpdatePage,
   onSubmitGeralInfo,
-  onUploadMedia
+  onUploadMedia,
+  togglePublish,
+  onDelete
 }: GeralInfoDataProps) {
   const [pageBackup, setPageBackup] = useState<Page>(page);
   const form = useForm<GeralInfoFormData>({
@@ -181,8 +209,30 @@ export default function GeralInfoData({
       <Form {...form}>
         <form>
           <div className="flex flex-col gap-10">
-            <div className="flex">
+            <div className="flex justify-between items-center">
               <span className="text-2xl">Informações Gerais</span>
+              <div className="flex gap-2">
+                {togglePublish && (
+                  <Button
+                    variant={'ghost'}
+                    type="button"
+                    className="p-2"
+                    onClick={() => togglePublish(page)}
+                  >
+                    {page.publishedAt ? <PauseIcon /> : <PlayIcon />}
+                  </Button>
+                )}
+                {onDelete && (
+                  <Button
+                    variant={'ghost'}
+                    type="button"
+                    className="p-2"
+                    onClick={() => onDelete(page.id)}
+                  >
+                    <TrashIcon />
+                  </Button>
+                )}
+              </div>
             </div>
             <div className="grid grid-cols-6 gap-4">
               <FormField

@@ -3,6 +3,7 @@ import {
   CardType,
   Item,
   Media,
+  Page,
   Section
 } from '@/application/entities';
 import { GetPageResponse } from '@/application/modules/pages/entities';
@@ -25,6 +26,7 @@ export interface RemotePage {
   x: string | null;
   section_pages: Sectionpage[];
   page_items: any[];
+  publishedAt: Date | null;
 }
 
 interface Sectionpage {
@@ -61,8 +63,9 @@ export function toPageDomain({
   x,
   locale,
   whatsapp,
-  photoProfile
-}: RemotePage): GetPageResponse {
+  photoProfile,
+  publishedAt
+}: RemotePage): Page {
   return {
     id: documentId,
     name,
@@ -78,7 +81,8 @@ export function toPageDomain({
     x: x ? x : undefined,
     linkedin: linkedin ? linkedin : undefined,
     locationLink: locale ? locale : undefined,
-    whatsapp: whatsapp ? whatsapp : undefined
+    whatsapp: whatsapp ? whatsapp : undefined,
+    publishedAt
   };
 }
 
