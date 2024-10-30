@@ -30,7 +30,7 @@ export default function DashboardScreen({
         onSignOut={onSignOut}
       />
       <div className="flex-1 flex overflow-hidden">
-        <AsideMenu />
+        {/* <AsideMenu /> */}
         <div className="flex-1 flex flex-col">{children}</div>
       </div>
     </div>

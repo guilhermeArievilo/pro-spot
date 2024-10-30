@@ -687,7 +687,7 @@ export default function ShowPage() {
               <div className="flex flex-col items-center gap-4">
                 <span className="text-2xl w-full">Secções</span>
                 <div className="w-full flex flex-col gap-6">
-                  {currentPage?.sectionsPages?.map((section, index) => (
+                  {currentPage.sectionsPages?.map((section, index) => (
                     <SectionBlock
                       key={section.id}
                       section={section}
@@ -778,6 +778,7 @@ export default function ShowPage() {
           )}
           {currentTab === 'geral' && (
             <GeralInfoData
+              key={currentPage.id}
               page={currentPage}
               onUpdatePage={setCurrentPage}
               onSubmitGeralInfo={updateCurrentPage}

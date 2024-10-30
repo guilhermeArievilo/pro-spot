@@ -1,7 +1,7 @@
 import { Media } from '@/application/entities';
 
 export type User = {
-  id: string | number;
+  id: string;
 } & UserScheme;
 
 export type UserScheme = {

@@ -183,7 +183,61 @@ export default class StrapiPagesApiRepository implements PageRepository {
     return data.appUser.pages.map((page: RemotePage) => toPageDomain(page));
   }
 
-  addPage(page: PageSchema): Promise<GetPageResponse> {
+  async createPage(
+    { slug, name, content, backgroundMedia, photoProfile }: PageSchema,
+    userId: string
+  ): Promise<Page> {
+    const data = {
+      name,
+      content,
+      slug
+    };
+
+    if (backgroundMedia) {
+      Object.assign(data, {
+        backgroundMedia: {
+          set: [backgroundMedia]
+        }
+      });
+    }
+
+    if (photoProfile) {
+      Object.assign(data, {
+        photoProfile: {
+          set: [photoProfile]
+        }
+      });
+    }
+
+    const query = qs.stringify({
+      populate: [
+        'photoProfile',
+        'backgroundMedia',
+        'page_items',
+        'section_pages'
+      ]
+    });
+
+    const result = await this.AxiosClientService.post(`/pages?${query}`, {
+      data
+    });
+
+    if (!result.data) {
+      throw new Error('Page not created');
+    }
+
+    await this.AxiosClientService.put(`/app-users/${userId}`, {
+      data: {
+        pages: {
+          connect: [result.data.data.id]
+        }
+      }
+    });
+
+    return toPageDomain(result.data.data);
+  }
+
+  deletePage(pageId: string): Promise<void> {
     throw new Error('Method not implemented.');
   }
 

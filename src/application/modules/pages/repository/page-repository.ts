@@ -22,11 +22,12 @@ export type UpdateItemRequest = {
 };
 
 export default abstract class PageRepository {
-  abstract addPage(page: PageSchema): Promise<GetPageResponse>;
   abstract getPage(slug: string): Promise<GetPageResponse>;
   abstract getPagesByUser(userId: string): Promise<Page[]>;
   abstract getPageById(id: string): Promise<Page>;
+  abstract createPage(page: PageSchema, userid: string): Promise<Page>;
   abstract updatePage(props: UpdatePageRequest): Promise<Page>;
+  abstract deletePage(pageId: string): Promise<void>;
   abstract createSection(section: SectionSchema): Promise<Section>;
   abstract updateSection(props: UpdateSectionRequest): Promise<Section>;
   abstract deleteSection(id: string): Promise<void>;

@@ -1,14 +1,5 @@
 'use client';
-import DashboardHeader from '@/components/dashboard/dashboard-header';
-import { Button } from '@/components/ui/button';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle
-} from '@/components/ui/drawer';
+
 import { useEffect, useState } from 'react';
 import { useAuth, useUser } from '@clerk/nextjs';
 import { redirect } from 'next/navigation';
@@ -23,10 +14,14 @@ import GetUserByAuthServiceIdUsecase from '@/application/modules/user/usecase/ge
 import GetPagesByUserId from '@/application/modules/pages/usecases/get-pages-by-user-id';
 import { UserScheme } from '@/application/modules/user/entities';
 import { Toaster } from '@/components/ui/sonner';
-import { AsideMenu } from '@/components/dashboard/aside-menu';
 import Loading from '@/components/loading';
 import DashboardScreen from '@/application/modules/pages/presentation/screens/dashboard-screen';
 import Error from '@/components/error';
+import CreatePageScreen from '@/application/modules/pages/presentation/screens/create-page-screen';
+import UploadMediaUsecase from '@/application/modules/pages/usecases/upload-media-usecase';
+import { PageSchema } from '@/application/modules/pages/entities';
+import CreatePageUsecase from '@/application/modules/pages/usecases/create-page-usecase';
+import { toast } from 'sonner';
 
 export default function DashboardLayout({
   children
@@ -40,12 +35,18 @@ export default function DashboardLayout({
   const [isLoading, setIsLoading] = useState(true);
   const [onError, setError] = useState(false);
   const { setUser, user: userData } = useUserStore();
-  const { setPages, setSelectedPage } = usePagesStore();
+  const { setPages, setSelectedPage, pages } = usePagesStore();
   const userRepository = new StrapiUserRepository(GraphQlClient, axiosInstance);
   const pagesRepository = new StrapiPagesApiRepository(
     GraphQlClient,
     axiosInstance
   );
+
+  async function uploadMedia(media: File) {
+    const uploadMediaCase = new UploadMediaUsecase(pagesRepository);
+
+    return await uploadMediaCase.execute(media);
+  }
 
   async function fetchPages(userId: string) {
     const getPagesByUserId = new GetPagesByUserId(pagesRepository);
@@ -103,6 +104,29 @@ export default function DashboardLayout({
     return fetchedUser;
   }
 
+  async function handleCreatePage(data: PageSchema) {
+    const createPageCase = new CreatePageUsecase(pagesRepository);
+
+    if (userData?.id) {
+      await createPageCase
+        .execute(data, userData.id)
+        .then((page) => {
+          if (pages.length) {
+            setPages([...pages, page]);
+            toast(`Ôba, a página: "${page.name}" foi criada !`);
+          } else {
+            setPages([page]);
+          }
+        })
+        .catch((e) => {
+          console.error(e);
+          toast('Ops, tivemos um problema', {
+            description: 'Por algum motivo não conseguimos criar sua página'
+          });
+        });
+    }
+  }
+
   useEffect(() => {
     createUserIfNotExist(userId!);
   }, [userId, user]);
@@ -140,24 +164,12 @@ export default function DashboardLayout({
       >
         {children}
       </DashboardScreen>
-      <Drawer open={toggleModal}>
-        <DrawerContent>
-          <div className="container">
-            <DrawerHeader>
-              <DrawerTitle>Vamos criar uma Página</DrawerTitle>
-              <DrawerDescription>Preencha os campos a seguir</DrawerDescription>
-            </DrawerHeader>
-            <DrawerFooter>
-              <div className="flex items-center gap-3">
-                <Button variant="outline" onClick={toggleModalTrigger}>
-                  Cancelar
-                </Button>
-                <Button>Criar</Button>
-              </div>
-            </DrawerFooter>
-          </div>
-        </DrawerContent>
-      </Drawer>
+      <CreatePageScreen
+        open={toggleModal}
+        changeOpen={(isOpen) => setToggleModal(isOpen)}
+        onUploadMedia={uploadMedia}
+        onSubmit={handleCreatePage}
+      />
       <Toaster />
     </>
   );

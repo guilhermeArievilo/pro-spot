@@ -56,7 +56,7 @@ export default function GeralInfoData({
   onSubmitGeralInfo,
   onUploadMedia
 }: GeralInfoDataProps) {
-  const [pageBackup, setPageBackup] = useState<Page>();
+  const [pageBackup, setPageBackup] = useState<Page>(page);
   const form = useForm<GeralInfoFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -149,7 +149,6 @@ export default function GeralInfoData({
 
   useEffect(() => {
     if (onUpdatePage) {
-      console.log(form.getValues());
       onUpdatePage({
         ...page,
         name: nameWatcher,
@@ -177,11 +176,6 @@ export default function GeralInfoData({
     backgroundMediaWatcher
   ]);
 
-  useEffect(() => {
-    if (!pageBackup) {
-      setPageBackup(_.cloneDeep(page));
-    }
-  }, []);
   return (
     <div className="flex flex-col gap-12">
       <Form {...form}>
