@@ -32,7 +32,7 @@ export default abstract class PageRepository {
   abstract updateSection(props: UpdateSectionRequest): Promise<Section>;
   abstract deleteSection(id: string): Promise<void>;
   abstract createItem(props: ItemSchema): Promise<Item>;
-  abstract updateItem(props: UpdateItemRequest): Promise<void>;
+  abstract updateItem(props: UpdateItemRequest): Promise<Item>;
   abstract deleteItem(id: string): Promise<void>;
   abstract updatePublishedStateItem(
     id: string,

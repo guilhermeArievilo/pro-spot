@@ -1,9 +1,6 @@
+import { Section } from '@/application/entities';
 import { SectionSchema } from '../entities';
 import PageRepository from '../repository/page-repository';
-
-interface UpdateSectionUsecaseResponse {
-  status: 'success' | 'error';
-}
 
 export default class UpdateSectionUsecase {
   constructor(private repository: PageRepository) {}
@@ -14,21 +11,12 @@ export default class UpdateSectionUsecase {
   }: {
     id: string;
     data: SectionSchema;
-  }): Promise<UpdateSectionUsecaseResponse> {
-    try {
-      await this.repository.updateSection({
-        id,
-        data
-      });
+  }): Promise<Section> {
+    const section = await this.repository.updateSection({
+      id,
+      data
+    });
 
-      return {
-        status: 'success'
-      };
-    } catch (e) {
-      console.error(e);
-      return {
-        status: 'error'
-      };
-    }
+    return section;
   }
 }

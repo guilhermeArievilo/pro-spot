@@ -554,7 +554,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
     return toPageItemDomain(result.data.data);
   }
 
-  async updateItem({ id, data }: UpdateItemRequest): Promise<void> {
+  async updateItem({ id, data }: UpdateItemRequest): Promise<Item> {
     // /api/page-items/:id
 
     const bodyData = {
@@ -594,9 +594,11 @@ export default class StrapiPagesApiRepository implements PageRepository {
       }
     );
 
-    if (!result?.data) {
-      throw new Error('Page not updated');
+    if (!result.data.data) {
+      throw new Error('Item not updated');
     }
+
+    return toPageItemDomain(result.data.data);
   }
 
   async updatePublishedStateItem(
