@@ -40,6 +40,7 @@ export type Page = {
   id: string;
   slug: string;
   name: string;
+  views?: number;
   content: string;
   backgroundMedia: Media;
   photoProfile: Media;

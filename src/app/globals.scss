@@ -27,8 +27,8 @@ body {
     --popover-foreground: theme('colors.light.onSurface');
     --primary: theme('colors.light.scrim');
     --primary-foreground: theme('colors.light.inverseOnSurface');
-    --secondary: theme('colors.light.secondary');
-    --secondary-foreground: theme('colors.light.onSecondary');
+    --secondary: theme('colors.light.surface');
+    --secondary-foreground: theme('colors.light.onSurface');
     --muted: theme('colors.light.surface');
     --muted-foreground: theme('colors.light.onSurfaceVariant');
     --accent: theme('colors.light.surfaceContainer');
@@ -54,8 +54,8 @@ body {
     --popover-foreground: theme('colors.dark.onSurface');
     --primary: theme('colors.dark.inverseSurface');
     --primary-foreground: theme('colors.dark.inverseOnSurface');
-    --secondary: theme('colors.dark.secondary');
-    --secondary-foreground: theme('colors.dark.onSecondary');
+    --secondary: theme('colors.dark.surface');
+    --secondary-foreground: theme('colors.dark.onSurface');
     --muted: theme('colors.dark.surfaceContainerHigh');
     --muted-foreground: theme('colors.dark.onSurfaceVariant');
     --accent: theme('colors.dark.surfaceContainer');

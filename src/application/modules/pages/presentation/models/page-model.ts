@@ -4,6 +4,8 @@ import { PageSchema } from '../../entities';
 import CreatePageUsecase from '../../usecases/create-page-usecase';
 import GetPageByIdUsecase from '../../usecases/get-page-by-id-usecase';
 import UpdatePageUsecase from '../../usecases/update-page-usecase';
+import GetPageUsecase from '../../usecases/get-page-usecase';
+import AddViewToPageUsecase from '../../usecases/add-view-to-page-usecase';
 
 interface usePageModelProps {
   pageRepository: PageRepository;
@@ -25,6 +27,13 @@ export default function usePageModel({ pageRepository }: usePageModelProps) {
     return pages;
   }
 
+  async function getPageBySlug(slug: string) {
+    const getPageUsecase = new GetPageUsecase(pageRepository);
+    const page = await getPageUsecase.execute(slug);
+
+    return page;
+  }
+
   async function createPage(data: PageSchema, userId: string) {
     const createPageCase = new CreatePageUsecase(pageRepository);
     const page = await createPageCase.execute(data, userId);
@@ -42,12 +51,19 @@ export default function usePageModel({ pageRepository }: usePageModelProps) {
     return page;
   }
 
+  async function addViewToPage(slug: string) {
+    const addViewToPageCase = new AddViewToPageUsecase(pageRepository);
+    await addViewToPageCase.execute(slug);
+  }
+
   // implementar o delete page
 
   return {
+    getPageBySlug,
     fetchPageById,
     fetchPagesByUserId,
     createPage,
-    updatePage
+    updatePage,
+    addViewToPage
   };
 }

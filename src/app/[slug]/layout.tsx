@@ -1,10 +1,7 @@
-import GetPageUsecase from '@/application/modules/pages/usecases/get-page-usecase';
 import FooterPage from '@/components/page/footer-page';
 import { HeaderPage } from '@/components/page/header-page';
-import { getClient } from '@/infra/http/apolloService';
-import axiosInstance from '@/infra/http/axiosService';
-import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
 import { notFound } from 'next/navigation';
+import useSlugPageModel from './slug-page-model';
 
 export default async function PageLayout({
   params,
@@ -13,13 +10,9 @@ export default async function PageLayout({
   params: { slug: string };
   children: React.ReactNode;
 }) {
-  const strapiPageRepository = new StrapiPagesApiRepository(
-    getClient(),
-    axiosInstance
-  );
-  const getPageUsecase = new GetPageUsecase(strapiPageRepository);
+  const { getPageBySlug } = useSlugPageModel();
 
-  const page = await getPageUsecase.execute(params.slug);
+  const page = await getPageBySlug(params.slug);
 
   if (!page) return notFound();
 

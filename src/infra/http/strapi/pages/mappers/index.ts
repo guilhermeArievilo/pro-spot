@@ -13,6 +13,7 @@ import { StrapiMedia } from '../../shared/entities';
 export interface RemotePage {
   name: string;
   slug: string;
+  views: number | null;
   content: string;
   documentId: string;
   backgroundMedia: StrapiMedia;
@@ -64,7 +65,8 @@ export function toPageDomain({
   locale,
   whatsapp,
   photoProfile,
-  publishedAt
+  publishedAt,
+  views
 }: RemotePage): Page {
   return {
     id: documentId,
@@ -82,7 +84,8 @@ export function toPageDomain({
     linkedin: linkedin ? linkedin : undefined,
     locationLink: locale ? locale : undefined,
     whatsapp: whatsapp ? whatsapp : undefined,
-    publishedAt
+    publishedAt,
+    views: views ? views : undefined
   };
 }
 

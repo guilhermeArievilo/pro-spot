@@ -13,8 +13,8 @@ import {
 
 interface TopBodyMenuProps {
   pageName: string;
-  views: number;
-  clicks: number;
+  views?: number;
+  clicks?: number;
   onSharedPress: (option: 'card' | 'QRCode' | 'copyLinkPage') => void;
   options: {
     label: string;
@@ -54,9 +54,9 @@ export default function TopBodyMenu({
       </div>
       <div className="flex justify-center items-center gap-6">
         <div className="flex items-center gap-2 pt-2">
-          <span>{views} Visitas</span>
+          <span>{views ? `${views} Visitas` : 'Nenhuma visita ainda'}</span>
           <span className="w-1 h-1 rounded-full bg-foreground" />
-          <span>{clicks} Cliques</span>
+          <span>{clicks ? `${clicks} Cliques` : 'Nenhum clique ainda'}</span>
         </div>
         <div className="flex gap-2">
           <span className="text-4xl pt-2">{pageName}</span>

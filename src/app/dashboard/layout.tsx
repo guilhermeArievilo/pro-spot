@@ -26,7 +26,7 @@ export default function DashboardLayout({
     handleCreatePage
   } = useDashboardLayoutModel();
 
-  if (isLoading) {
+  if (isLoading && !userData) {
     return <Loading />;
   }
 
@@ -39,9 +39,8 @@ export default function DashboardLayout({
       <DashboardScreen
         onPressToCreatePage={toggleModalTrigger}
         navigateToPage={(page) => setSelectedPage(page)}
-        userName={user?.firstName || ''}
-        avatarUrl={userData?.photoProfile?.src || ''}
         onSignOut={signOut}
+        user={userData!}
       >
         {children}
       </DashboardScreen>

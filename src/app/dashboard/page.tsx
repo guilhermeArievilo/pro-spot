@@ -50,14 +50,13 @@ export default function ShowPage() {
         <div className="col-span-12">
           <TopBodyMenu
             pageName={currentPage.name}
-            clicks={300}
-            views={1000}
             onSharedPress={sharePage}
             options={navigationMenuPage}
             defaultOption={navigationMenuPage[0].value}
             onOptionChange={(opionValue) => {
               setCurrentTab(opionValue);
             }}
+            views={currentPage.views}
           />
         </div>
       )}

@@ -1,13 +1,12 @@
 import { Page } from '@/application/entities';
-import { AsideMenu } from '@/components/dashboard/aside-menu';
+import { User } from '@/application/modules/user/entities';
 import DashboardHeader from '@/components/dashboard/dashboard-header';
 import { ReactNode } from 'react';
 
 interface DashboardScreenProps {
   onPressToCreatePage: () => void;
   navigateToPage: (page: Page) => void;
-  userName: string;
-  avatarUrl: string;
+  user: User;
   children: ReactNode;
   onSignOut: () => void;
 }
@@ -15,19 +14,17 @@ interface DashboardScreenProps {
 export default function DashboardScreen({
   onPressToCreatePage,
   navigateToPage,
-  userName,
   children,
-  avatarUrl,
-  onSignOut
+  onSignOut,
+  user
 }: DashboardScreenProps) {
   return (
     <div className="h-screen w-screen flex flex-col">
       <DashboardHeader
         onPressToCreatePage={onPressToCreatePage}
         handlePageClick={navigateToPage}
-        userName={userName}
-        avatarUrl={avatarUrl}
         onSignOut={onSignOut}
+        user={user}
       />
       <div className="flex-1 flex overflow-hidden">
         {/* <AsideMenu /> */}

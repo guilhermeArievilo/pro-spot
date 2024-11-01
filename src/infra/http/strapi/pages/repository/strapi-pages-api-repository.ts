@@ -36,6 +36,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
         documentId
         content
         publishedAt
+        views
         photoProfile {
           documentId
           url
@@ -144,6 +145,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
             x
             updatedAt
             publishedAt
+            views
             backgroundMedia {
               documentId
               url
@@ -249,6 +251,7 @@ export default class StrapiPagesApiRepository implements PageRepository {
           content
           documentId
           slug
+          views
           publishedAt
           backgroundMedia {
             documentId
@@ -417,6 +420,42 @@ export default class StrapiPagesApiRepository implements PageRepository {
 
     return toPageDomain({
       ...result.page
+    });
+  }
+
+  async addViewToPage(slug: string): Promise<void> {
+    const slugQuery = gql`
+      query Query($filters: PageFiltersInput) {
+        pages(filters: $filters) {
+          documentId
+          name
+          views
+        }
+      }
+    `;
+
+    await this.ApolloClientService.query({
+      query: slugQuery,
+      variables: {
+        filters: {
+          slug: {
+            eq: slug
+          }
+        }
+      }
+    }).then(async ({ data, error }) => {
+      if (error) throw new Error(error.message);
+
+      if (!data?.pages?.length) new Error('Could not find page');
+
+      const documentId = data.pages[0].documentId;
+      const atualViews = data.pages[0].views;
+
+      await this.AxiosClientService.put(`/pages/${documentId}`, {
+        data: {
+          views: atualViews + 1
+        }
+      });
     });
   }
 
