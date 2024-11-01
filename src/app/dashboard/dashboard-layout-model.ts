@@ -2,8 +2,6 @@ import { PageSchema } from '@/application/modules/pages/entities';
 import useMediaModel from '@/application/modules/pages/presentation/models/media-model';
 import usePageModel from '@/application/modules/pages/presentation/models/page-model';
 import useUserModel from '@/application/modules/pages/presentation/models/user-model';
-import GetPagesByUserId from '@/application/modules/pages/usecases/get-pages-by-user-id';
-import UploadMediaUsecase from '@/application/modules/pages/usecases/upload-media-usecase';
 import axiosInstance from '@/infra/http/axiosService';
 import { GraphQlClient } from '@/infra/http/onClientApolloService';
 import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';

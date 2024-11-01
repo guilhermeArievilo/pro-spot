@@ -1,41 +1,12 @@
 'use client';
-
-import { Item, Page, Section } from '@/application/entities';
-import {
-  ItemSchema,
-  PageSchema,
-  SectionSchema
-} from '@/application/modules/pages/entities';
-import GetPageByIdUsecase from '@/application/modules/pages/usecases/get-page-by-id-usecase';
-import UpdatePageUsecase from '@/application/modules/pages/usecases/update-page-usecase';
 import GeralInfoData from '@/components/dashboard/geral-info-data';
 import ItemBlock from '@/components/dashboard/item-block';
 import Preview from '@/components/dashboard/preview';
 import SectionBlock from '@/components/dashboard/section-block';
-import axiosInstance from '@/infra/http/axiosService';
-import { GraphQlClient } from '@/infra/http/onClientApolloService';
-import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
-import usePagesStore from '@/store/pages';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 import TopBodyMenu from '@/components/dashboard/top-body-menu';
-import UpdateSectionUsecase from '@/application/modules/pages/usecases/update-section-usecase';
-import UpdateItemUsecase from '@/application/modules/pages/usecases/update-item-usecase';
 import CreateItemRotine from '@/components/dashboard/choose-type-item';
-import CreateItemUsecase from '@/application/modules/pages/usecases/create-item-usecase';
-import DeleteItemUsecase from '@/application/modules/pages/usecases/delete-item-usecase';
-import CreateSectionItemUsecase from '@/application/modules/pages/usecases/create-section-item';
 import ConfirmAction from '@/components/dashboard/confirm-action';
 import CreateSectionEntry from '@/components/dashboard/create-section-entry';
-import UploadMediaUsecase from '@/application/modules/pages/usecases/upload-media-usecase';
-import PublishItemUsecase from '@/application/modules/pages/usecases/publish-item-usecase';
-import UnpublishItemUsecase from '@/application/modules/pages/usecases/unpublish-item-usecase';
-import PublishSectionUsecase from '@/application/modules/pages/usecases/publish-section-usecase';
-import UnpublishSectionUsecase from '@/application/modules/pages/usecases/unpublish-section-usecase';
-import CreateSectionUsecase from '@/application/modules/pages/usecases/create-section-usecase';
-import DeleteSectionUsecase from '@/application/modules/pages/usecases/delete-section-usecase';
-import QRCodeStyling from 'qr-code-styling';
-import { themeColors } from '@/theme/color';
 import CardDialog from '@/components/dashboard/CardDialog';
 import useDashboardPageModel from './dashboard-page-model';
 

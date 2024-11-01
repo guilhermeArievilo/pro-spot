@@ -33,7 +33,6 @@ export default function CardDialog({
   baseUrl
 }: CardDialogProps) {
   const cardRef = useRef(null);
-  const qrCodeRef = useRef(null);
 
   const handleDownloadImage = async () => {
     if (cardRef.current) {
@@ -47,10 +46,15 @@ export default function CardDialog({
   };
 
   useEffect(() => {
-    if (qrCodeRef.current && qrCode) {
-      qrCode.append(qrCodeRef.current);
+    if (qrCode && open) {
+      setTimeout(() => {
+        const container = document.getElementById('qrcode-container');
+        if (container) {
+          qrCode.append(container);
+        }
+      }, 10);
     }
-  });
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={onChangeOpen}>
@@ -77,8 +81,11 @@ export default function CardDialog({
                 <span className="text-sm opacity-60">{page.content}</span>
               </div>
             </div>
-            <div className="flex flex-col items-center gap-2">
-              <div ref={qrCodeRef}></div>
+            <div
+              key={'qrcode'}
+              id="qrcode-container"
+              className="flex flex-col items-center gap-2"
+            >
               <span className="text-xs opacity-60">
                 Escaneie o QR Code abaixo
               </span>
