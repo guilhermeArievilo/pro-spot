@@ -6,6 +6,7 @@ export default class GetUserByAuthServiceIdUsecase {
 
   async execute(userAuthServiceId: string): Promise<User | null> {
     try {
+      if (!userAuthServiceId) return null;
       const user =
         await this.repository.getUserByAuthServiceId(userAuthServiceId);
 

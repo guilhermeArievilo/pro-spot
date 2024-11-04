@@ -9,22 +9,25 @@ import StrapiUserRepository from '@/infra/http/strapi/users/repository/strapi-us
 import usePagesStore from '@/store/pages';
 import useUserStore from '@/store/uset';
 import { useAuth, useUser } from '@clerk/nextjs';
+import { UserResource } from '@clerk/types';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function useDashboardLayoutModel() {
-  const { isLoaded, userId, signOut } = useAuth();
-  const { user } = useUser();
-  const [toggleModal, setToggleModal] = useState(false);
-
   const userRepository = new StrapiUserRepository(GraphQlClient, axiosInstance);
   const pageRepository = new StrapiPagesApiRepository(
     GraphQlClient,
     axiosInstance
   );
 
+  const { signOut } = useAuth();
+  const { user, isLoaded } = useUser();
+
+  const [toggleModal, setToggleModal] = useState(false);
+
   const { createPage, fetchPagesByUserId } = usePageModel({ pageRepository });
   const { uploadMedia } = useMediaModel({ pageRepository });
+
   const { createUser, fetchUserByAuthServiceId } = useUserModel({
     userRepository
   });
@@ -36,16 +39,19 @@ export default function useDashboardLayoutModel() {
 
   async function fetchPages(userId: string) {
     const pages = await fetchPagesByUserId(userId);
-    if (!pages) return;
+    if (!pages) {
+      setToggleModal(true);
+      return;
+    }
     setPages(pages);
   }
 
-  async function createUserIfNotExist(userAuthServiceId: string) {
-    const fetchedUser = await fetchUserByAuthServiceId(userAuthServiceId);
+  async function createUserIfNotExist(user: UserResource) {
+    const fetchedUser = await fetchUserByAuthServiceId(user.id);
 
     if (!fetchedUser && user) {
       const createdUser = await createUser({
-        authId: userAuthServiceId,
+        authId: user.id,
         name: user.firstName!,
         email: user.primaryEmailAddress?.emailAddress!,
         lastName: user.lastName!,
@@ -95,8 +101,10 @@ export default function useDashboardLayoutModel() {
   }
 
   useEffect(() => {
-    createUserIfNotExist(userId!);
-  }, [userId, user]);
+    if (user) {
+      createUserIfNotExist(user);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (userData) {
@@ -119,7 +127,6 @@ export default function useDashboardLayoutModel() {
     handleCreatePage,
     setSelectedPage,
     user,
-    userId,
     userData,
     signOut
   };

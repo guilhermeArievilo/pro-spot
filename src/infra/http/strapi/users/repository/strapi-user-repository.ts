@@ -77,6 +77,6 @@ export default class StrapiUserRepository implements UserRepository {
       throw new Error('User not created');
     }
 
-    return toUserDomain(result.data);
+    return toUserDomain(result.data.data);
   }
 }

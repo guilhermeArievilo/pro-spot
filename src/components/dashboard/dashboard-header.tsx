@@ -74,7 +74,9 @@ export default function DashboardHeader({
             <Separator />
             <Button variant={'secondary'}>Editar perfil</Button>
             <Button variant={'secondary'}>Suporte</Button>
-            <Button variant={'destructive'}>Sair</Button>
+            <Button variant={'destructive'} onClick={() => onSignOut()}>
+              Sair
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
