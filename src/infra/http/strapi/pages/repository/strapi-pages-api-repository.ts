@@ -239,8 +239,19 @@ export default class StrapiPagesApiRepository implements PageRepository {
     return toPageDomain(result.data.data);
   }
 
-  deletePage(pageId: string): Promise<void> {
-    throw new Error('Method not implemented.');
+  async updatePublishedStatePage(
+    id: string,
+    state: Date | null
+  ): Promise<void> {
+    await this.AxiosClientService.put(`/pages/${id}`, {
+      data: {
+        publishedAt: state
+      }
+    });
+  }
+
+  async deletePage(pageId: string): Promise<void> {
+    await this.AxiosClientService.delete(`/pages/${pageId}`);
   }
 
   async getPage(slug: string): Promise<GetPageResponse> {

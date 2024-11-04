@@ -37,6 +37,7 @@ type ConfirmActionDataProps = {
   onConfirmRef: string;
   recordId: string;
   sectionId?: string;
+  critical?: boolean;
 };
 
 export default function useDashboardPageModel() {
@@ -58,14 +59,18 @@ export default function useDashboardPageModel() {
   );
 
   const [currentPage, setCurrentPage] = useState<Page>();
-  const { pages, setSelectedPage, pageSelected } = usePagesStore();
+  const { pages, setSelectedPage, pageSelected, setPages } = usePagesStore();
 
   const pageRepository = new StrapiPagesApiRepository(
     GraphQlClient,
     axiosInstance
   );
 
-  const { fetchPageById: fetchPageByIdModel, updatePage } = usePageModel({
+  const {
+    fetchPageById: fetchPageByIdModel,
+    updatePage,
+    deletePage
+  } = usePageModel({
     pageRepository
   });
 
@@ -137,6 +142,23 @@ export default function useDashboardPageModel() {
             description: 'Tente em alguns estantes'
           });
         });
+    }
+  }
+
+  async function handlerDeletePage(pageId: string) {
+    const pageIndex = pages.findIndex((page) => page.id === pageId);
+
+    if (pageIndex !== -1) {
+      await deletePage(pageId).then(() => {
+        const atualPages = pages;
+        atualPages.splice(pageIndex, 1);
+        setPages(atualPages);
+        if (pageSelected?.id === pageId && pages.length) {
+          setCurrentPage(pages[0]);
+        } else {
+          setCurrentPage(undefined);
+        }
+      });
     }
   }
 
@@ -660,6 +682,7 @@ export default function useDashboardPageModel() {
   return {
     uploadMedia,
     updateCurrentPage,
+    handlerDeletePage,
     handlerCreateSection,
     handlerUpdateSection,
     handlerDeleteSection,

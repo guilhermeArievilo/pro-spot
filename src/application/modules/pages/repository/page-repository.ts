@@ -28,6 +28,10 @@ export default abstract class PageRepository {
   abstract createPage(page: PageSchema, userid: string): Promise<Page>;
   abstract updatePage(props: UpdatePageRequest): Promise<Page>;
   abstract deletePage(pageId: string): Promise<void>;
+  abstract updatePublishedStatePage(
+    id: string,
+    state: Date | null
+  ): Promise<void>;
   abstract addViewToPage(slug: string): Promise<void>;
   abstract createSection(section: SectionSchema): Promise<Section>;
   abstract updateSection(props: UpdateSectionRequest): Promise<Section>;

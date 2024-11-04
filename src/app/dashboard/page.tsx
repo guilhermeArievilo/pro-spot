@@ -31,6 +31,7 @@ export default function ShowPage() {
     uploadMedia,
     setCurrentPage,
     updateCurrentPage,
+    handlerDeletePage,
     confirmActionData,
     onDeleteConfirmation,
     cardDialogOpen,
@@ -174,7 +175,7 @@ export default function ShowPage() {
               onUpdatePage={setCurrentPage}
               onSubmitGeralInfo={updateCurrentPage}
               onUploadMedia={uploadMedia}
-              onDelete={() => {}}
+              onDelete={handlerDeletePage}
               togglePublish={() => {}}
             />
           )}

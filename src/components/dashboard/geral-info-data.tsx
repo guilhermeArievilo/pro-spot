@@ -34,13 +34,14 @@ import { GraphQlClient } from '@/infra/http/onClientApolloService';
 import PlayIcon from '@/assets/svg/icons/play.svg';
 import PauseIcon from '@/assets/svg/icons/pause.svg';
 import TrashIcon from '@/assets/svg/icons/trash.svg';
+import DeletePageDialog from '@/application/modules/pages/presentation/screens/delete-page-screen/delete-page-dialog';
 interface GeralInfoDataProps {
   page: Page;
   onUpdatePage?: (page: Page) => void;
   onSubmitGeralInfo?: (formData: PageSchema) => void;
   onUploadMedia: (media: File) => Promise<Media>;
   togglePublish?: (page: Page) => void;
-  onDelete?: (pageId: string) => void;
+  onDelete?: (pageId: string) => Promise<void>;
 }
 
 const formSchema = z.object({
@@ -84,6 +85,7 @@ export default function GeralInfoData({
   togglePublish,
   onDelete
 }: GeralInfoDataProps) {
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [pageBackup, setPageBackup] = useState<Page>(page);
   const form = useForm<GeralInfoFormData>({
     resolver: zodResolver(formSchema),
@@ -227,7 +229,7 @@ export default function GeralInfoData({
                     variant={'ghost'}
                     type="button"
                     className="p-2"
-                    onClick={() => onDelete(page.id)}
+                    onClick={() => setIsDeleteDialogOpen(true)}
                   >
                     <TrashIcon />
                   </Button>
@@ -427,6 +429,12 @@ export default function GeralInfoData({
           Salvar
         </Button>
       </div>
+      <DeletePageDialog
+        open={isDeleteDialogOpen}
+        onChangeOpen={setIsDeleteDialogOpen}
+        page={page}
+        onSubmitConfirm={onDelete!}
+      />
     </div>
   );
 }

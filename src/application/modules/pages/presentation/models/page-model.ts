@@ -6,6 +6,7 @@ import GetPageByIdUsecase from '../../usecases/get-page-by-id-usecase';
 import UpdatePageUsecase from '../../usecases/update-page-usecase';
 import GetPageUsecase from '../../usecases/get-page-usecase';
 import AddViewToPageUsecase from '../../usecases/add-view-to-page-usecase';
+import DeletePageUsecase from '../../usecases/delete-page-usecase';
 
 interface usePageModelProps {
   pageRepository: PageRepository;
@@ -51,6 +52,11 @@ export default function usePageModel({ pageRepository }: usePageModelProps) {
     return page;
   }
 
+  async function deletePage(pageId: string) {
+    const updatePage = new DeletePageUsecase(pageRepository);
+    await updatePage.execute(pageId);
+  }
+
   async function addViewToPage(slug: string) {
     const addViewToPageCase = new AddViewToPageUsecase(pageRepository);
     await addViewToPageCase.execute(slug);
@@ -64,6 +70,7 @@ export default function usePageModel({ pageRepository }: usePageModelProps) {
     fetchPagesByUserId,
     createPage,
     updatePage,
+    deletePage,
     addViewToPage
   };
 }
