@@ -27,10 +27,13 @@ export default function DeletePageDialog({
   const { form, onSubmit } = useDeletePageModel({ page, onChangeOpen });
   return (
     <AlertDialog open={open} onOpenChange={onChangeOpen}>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-background/60 backdrop-blur-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>{`Você está excluindo a página "${page.name}", tem certeza disso ?`}</AlertDialogTitle>
-          <AlertDialogDescription>{`Para continuar a exclusão, repita no campo abaixo o seguinte fragmento: delete:${page.slug}`}</AlertDialogDescription>
+          <AlertDialogTitle className="text-destructive">{`Você está excluindo a página "${page.name}", tem certeza disso ?`}</AlertDialogTitle>
+          <AlertDialogDescription>
+            <span>{`Para continuar a exclusão, repita no campo abaixo o seguinte fragmento: `}</span>
+            <span className="text-destructive px-2">{`delete::${page.slug}`}</span>
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <Form {...form}>
           <form>

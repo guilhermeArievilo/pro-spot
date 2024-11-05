@@ -39,7 +39,7 @@ export default function DashboardHeader({
       : currentName.split('')[0];
   }, '');
   return (
-    <header className="w-full flex items-center justify-between px-4 py-2 bg-background/60 z-30">
+    <header className="w-full flex items-center justify-between px-4 py-2 bg-background/60 backdrop-blur-md z-30">
       <Link href={'/dashboard/'}>
         <ProSpotLogo className="w-10 h-10 fill-foreground" />
       </Link>
@@ -56,7 +56,7 @@ export default function DashboardHeader({
             <AvatarFallback>{fallbackChar}</AvatarFallback>
           </Avatar>
         </SheetTrigger>
-        <SheetContent>
+        <SheetContent className="bg-background/60 backdrop-blur-md">
           <SheetHeader>
             <SheetTitle>{`Olá, ${user.name}`}</SheetTitle>
             <SheetDescription>Configurações da sua conta</SheetDescription>

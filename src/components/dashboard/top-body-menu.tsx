@@ -71,7 +71,7 @@ export default function TopBodyMenu({
               </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent className="w-56">
+            <DropdownMenuContent className="w-56 bg-background/60 backdrop-blur-md">
               <DropdownMenuLabel className="flex items-center gap-2">
                 <ShareIcon className="stroke-foreground w-4 h-4" />
                 Compartilhar

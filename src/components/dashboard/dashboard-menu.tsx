@@ -19,7 +19,7 @@ export default function DashboardMenu({
   onPageClick
 }: DashboardMenuProps) {
   return (
-    <menu className="p-2 bg-light-surface/60 dark:bg-dark-surface/60 flex items-center justify-center gap-4 rounded-full">
+    <menu className="p-2 bg-light-surface/60 dark:bg-dark-surface/60 backdrop-blur-md flex items-center justify-center gap-4 rounded-full">
       {!pages?.length ? (
         <span className="px-4 text-xs opacity-30">
           Sem páginas até o momento

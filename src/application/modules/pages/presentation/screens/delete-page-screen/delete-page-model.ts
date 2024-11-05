@@ -34,7 +34,7 @@ export default function useDeletePageModel({
     { repeatConfirmation }: deletePageForm,
     callback: (pageId: string) => Promise<void>
   ): Promise<void> {
-    if (repeatConfirmation === `delete:${page.slug}`) {
+    if (repeatConfirmation === `delete::${page.slug}`) {
       try {
         await callback(page.id).then(() => {
           form.reset();

@@ -27,7 +27,7 @@ export default function ConfirmAction({
 }: ConfirmAction) {
   return (
     <AlertDialog open={open} onOpenChange={onChangeOpen}>
-      <AlertDialogContent>
+      <AlertDialogContent className="bg-background/60 backdrop-blur-md">
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>

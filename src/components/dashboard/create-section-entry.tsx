@@ -79,7 +79,7 @@ export default function CreateSectionEntry({
             <PlusIcon />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="my-4 p-4 gap-3 bg-dark-surfaceContainerLowest rounded-2xl">
+        <DropdownMenuContent className="my-4 p-4 gap-3 bg-background/60 backdrop-blur-md rounded-2xl">
           <DropdownMenuLabel>
             Escolha como você quer alinhar o conteúdo textual da sua secção
           </DropdownMenuLabel>

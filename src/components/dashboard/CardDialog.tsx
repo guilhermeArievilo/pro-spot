@@ -58,7 +58,7 @@ export default function CardDialog({
 
   return (
     <Dialog open={open} onOpenChange={onChangeOpen}>
-      <DialogContent>
+      <DialogContent className="bg-background/60 backdrop-blur-md">
         <DialogHeader>
           <DialogTitle>Seu card</DialogTitle>
         </DialogHeader>

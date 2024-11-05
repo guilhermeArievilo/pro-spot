@@ -32,7 +32,7 @@ body {
     --muted: theme('colors.light.surface');
     --muted-foreground: theme('colors.light.onSurfaceVariant');
     --accent: theme('colors.light.surfaceContainer');
-    --accent-foreground: theme('colors.light.onSurface');
+    --accent-foreground: theme('colors.light.onSurfaceVariant');
     --destructive: theme('colors.light.error');
     --destructive-foreground: theme('colors.light.onError');
     --border: theme('colors.light.outlineVariant');
@@ -59,7 +59,7 @@ body {
     --muted: theme('colors.dark.surfaceContainerHigh');
     --muted-foreground: theme('colors.dark.onSurfaceVariant');
     --accent: theme('colors.dark.surfaceContainer');
-    --accent-foreground: theme('colors.dark.onSurface');
+    --accent-foreground: theme('colors.dark.onSurfaceVariant');
     --destructive: theme('colors.dark.error');
     --destructive-foreground: theme('colors.dark.onError');
     --border: theme('colors.dark.outlineVariant');

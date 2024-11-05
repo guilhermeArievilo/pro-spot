@@ -102,7 +102,7 @@ export default function CreatePageScreen({
 
   return (
     <Drawer open={open}>
-      <DrawerContent>
+      <DrawerContent className="bg-background/60 backdrop-blur-md">
         <div className="container">
           <DrawerHeader>
             <DrawerTitle>Vamos criar uma Página</DrawerTitle>

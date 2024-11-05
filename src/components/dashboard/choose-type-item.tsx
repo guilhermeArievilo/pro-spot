@@ -115,7 +115,7 @@ export default function CreateItemRotine({
             <PlusIcon />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="my-4 p-4 gap-3 bg-dark-surfaceContainerLowest rounded-2xl">
+        <DropdownMenuContent className="my-4 p-4 gap-3 bg-background/60 backdrop-blur-md rounded-2xl">
           <DropdownMenuLabel>
             Escolha o tipo de item que você deseja adicionar a sua página
           </DropdownMenuLabel>
