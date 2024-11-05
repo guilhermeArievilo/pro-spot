@@ -5,6 +5,7 @@ import { Button } from './button';
 import { cn } from '@/lib/utils';
 import { CardType, Media } from '@/application/entities';
 import Link from 'next/link';
+import { Skeleton } from './skeleton';
 
 interface CardItemProps {
   title: string;
@@ -60,7 +61,7 @@ function ColItem({
         }
       )}
     >
-      {image && (
+      {image ? (
         <Image
           src={image.src}
           width={image.width}
@@ -68,6 +69,8 @@ function ColItem({
           alt={title}
           className="absolute top-0 left-0 w-full h-full object-cover rounded-3xl -z-10"
         />
+      ) : (
+        <Skeleton className="absolute top-0 left-0 w-full h-full rounded-3xl -z-10 bg-dark-surface" />
       )}
       <div className="absolute w-full h-1/2 bottom-0 left-0 bg-gradient-to-b from-transparent to-background" />
       {link && <LinkButton selfEnd href={link} />}
@@ -83,7 +86,7 @@ function ColItem({
 function BannerItem({ title, subtitle, link, image, type }: CardItemProps) {
   return (
     <div className="relative w-full aspect-video">
-      {image && (
+      {image ? (
         <Image
           src={image.src}
           width={image.width}
@@ -91,6 +94,8 @@ function BannerItem({ title, subtitle, link, image, type }: CardItemProps) {
           alt={title}
           className="absolute top-0 left-0 w-full h-full object-cover rounded-3xl"
         />
+      ) : (
+        <Skeleton className="absolute top-0 left-0 w-full h-full rounded-3xl bg-dark-surface" />
       )}
       {link && (
         <div className="absolute w-full h-full flex justify-end p-4">
@@ -109,7 +114,7 @@ function ShowcaseItem({ title, subtitle, link, image, type }: CardItemProps) {
           <LinkButton selfEnd href={link} />
         </div>
       )}
-      {image && (
+      {image ? (
         <Image
           src={image.src}
           width={image.width}
@@ -117,6 +122,8 @@ function ShowcaseItem({ title, subtitle, link, image, type }: CardItemProps) {
           alt={title}
           className="w-full aspect-[9/12] object-cover rounded-3xl"
         />
+      ) : (
+        <Skeleton className="w-full aspect-[9/12] rounded-3xl bg-dark-surface -z-10" />
       )}
       <div className="flex flex-col z-10">
         <span className="text-base font-semibold">{title}</span>

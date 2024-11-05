@@ -219,43 +219,54 @@ export default function ItemBlock({
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="subtitle"
-                    render={({ field }) => (
-                      <FormItem className="col-span-3">
-                        <FormLabel>Subtítulo</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Insira um subtítulo" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="col-span-2">
+                  {type !== 'button' && type !== 'banner' && (
                     <FormField
                       control={form.control}
-                      name="image"
+                      name="subtitle"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Imagem</FormLabel>
+                        <FormItem className="col-span-3">
+                          <FormLabel>Subtítulo</FormLabel>
                           <FormControl>
-                            <ImageInput
-                              enableDelete
+                            <Input
+                              placeholder="Insira um subtítulo"
                               {...field}
-                              image={field.value}
-                              value={field.value?.src || ''}
-                              onChange={(e) => {
-                                uploadImage(e.target.files?.[0]!);
-                              }}
                             />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                  </div>
-                  <div className="col-span-4">
+                  )}
+                  {type !== 'button' && type !== 'row' && (
+                    <div className="col-span-2">
+                      <FormField
+                        control={form.control}
+                        name="image"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Imagem</FormLabel>
+                            <FormControl>
+                              <ImageInput
+                                enableDelete
+                                {...field}
+                                image={field.value}
+                                value={field.value?.src || ''}
+                                onChange={(e) => {
+                                  uploadImage(e.target.files?.[0]!);
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
+                  <div
+                    className={cn('col-span-4', {
+                      'col-span-2': type === 'button'
+                    })}
+                  >
                     <FormField
                       control={form.control}
                       name="link"
