@@ -37,7 +37,9 @@ export default function ShowPage() {
     cardDialogOpen,
     setCardDialogOpen,
     qrCode,
-    BASEURL
+    BASEURL,
+    handlerPublishPage,
+    handlerUnPublishPage
   } = useDashboardPageModel();
   if (!currentPage) {
     <main className="flex flex-col justify-center items-center">
@@ -176,7 +178,11 @@ export default function ShowPage() {
               onSubmitGeralInfo={updateCurrentPage}
               onUploadMedia={uploadMedia}
               onDelete={handlerDeletePage}
-              togglePublish={() => {}}
+              togglePublish={(currentPage) => {
+                currentPage.publishedAt
+                  ? handlerUnPublishPage(currentPage)
+                  : handlerPublishPage(currentPage);
+              }}
             />
           )}
         </div>

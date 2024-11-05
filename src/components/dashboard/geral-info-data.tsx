@@ -317,7 +317,7 @@ export default function GeralInfoData({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <SocialInput {...field}>
+                      <SocialInput {...field} placeholder="insira o link aqui">
                         <div className="p-1">
                           <InstagramIcon className="w-8 h-8 stroke-foreground" />
                         </div>
@@ -334,7 +334,7 @@ export default function GeralInfoData({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <SocialInput {...field}>
+                      <SocialInput {...field} placeholder="insira o link aqui">
                         <div className="p-1">
                           <XIcon className="w-8 h-8 fill-foreground" />
                         </div>
@@ -351,7 +351,7 @@ export default function GeralInfoData({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <SocialInput {...field}>
+                      <SocialInput {...field} placeholder="insira o link aqui">
                         <div className="p-1">
                           <WhatsappIcon className="w-8 h-8 fill-foreground" />
                         </div>
@@ -368,7 +368,7 @@ export default function GeralInfoData({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <SocialInput {...field}>
+                      <SocialInput {...field} placeholder="insira o link aqui">
                         <div className="p-1">
                           <FacebookIcon className="w-8 h-8 stroke-foreground" />
                         </div>
@@ -385,7 +385,7 @@ export default function GeralInfoData({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <SocialInput {...field}>
+                      <SocialInput {...field} placeholder="insira o link aqui">
                         <div className="p-1">
                           <LinkedInIcon className="w-8 h-8 stroke-foreground" />
                         </div>
@@ -402,7 +402,10 @@ export default function GeralInfoData({
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <SocialInput {...field}>
+                      <SocialInput
+                        {...field}
+                        placeholder="insira o link do google maps aqui"
+                      >
                         <div className="p-1">
                           <PinIcon className="w-8 h-8 stroke-foreground" />
                         </div>

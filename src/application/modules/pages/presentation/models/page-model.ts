@@ -7,6 +7,7 @@ import UpdatePageUsecase from '../../usecases/update-page-usecase';
 import GetPageUsecase from '../../usecases/get-page-usecase';
 import AddViewToPageUsecase from '../../usecases/add-view-to-page-usecase';
 import DeletePageUsecase from '../../usecases/delete-page-usecase';
+import PublishPageUsecase from '../../usecases/publish-page-usecase';
 
 interface usePageModelProps {
   pageRepository: PageRepository;
@@ -57,6 +58,22 @@ export default function usePageModel({ pageRepository }: usePageModelProps) {
     await updatePage.execute(pageId);
   }
 
+  async function publishPage(pageId: string) {
+    const publishPageCase = new PublishPageUsecase(pageRepository);
+
+    const { publishedAt } = await publishPageCase.execute(pageId);
+
+    return publishedAt;
+  }
+
+  async function unPublishPage(pageId: string) {
+    const publishPageCase = new PublishPageUsecase(pageRepository);
+
+    await publishPageCase.execute(pageId);
+
+    return null;
+  }
+
   async function addViewToPage(slug: string) {
     const addViewToPageCase = new AddViewToPageUsecase(pageRepository);
     await addViewToPageCase.execute(slug);
@@ -71,6 +88,8 @@ export default function usePageModel({ pageRepository }: usePageModelProps) {
     createPage,
     updatePage,
     deletePage,
-    addViewToPage
+    addViewToPage,
+    publishPage,
+    unPublishPage
   };
 }

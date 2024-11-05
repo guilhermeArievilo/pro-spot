@@ -69,7 +69,9 @@ export default function useDashboardPageModel() {
   const {
     fetchPageById: fetchPageByIdModel,
     updatePage,
-    deletePage
+    deletePage,
+    publishPage,
+    unPublishPage
   } = usePageModel({
     pageRepository
   });
@@ -160,6 +162,38 @@ export default function useDashboardPageModel() {
         }
       });
     }
+  }
+
+  async function handlerPublishPage(page: Page) {
+    await publishPage(page.id)
+      .then((publishedAt) => {
+        setCurrentPage((prev) => ({
+          ...prev!,
+          publishedAt
+        }));
+        toast(`A página "${page.name}" foi pulicada com sucesso !`);
+      })
+      .catch(() => {
+        toast('Ops', {
+          description: `Tivemos um problema em publicar a página: ${page.name}`
+        });
+      });
+  }
+
+  async function handlerUnPublishPage(page: Page) {
+    await unPublishPage(page.id)
+      .then((publishedAt) => {
+        setCurrentPage((prev) => ({
+          ...prev!,
+          publishedAt
+        }));
+        toast(`A página "${page.name}" foi despulicada com sucesso !`);
+      })
+      .catch(() => {
+        toast('Ops', {
+          description: `Tivemos um problema em despulicar a página: ${page.name}`
+        });
+      });
   }
 
   async function handlerCreateSection(section: SectionSchema) {
@@ -683,6 +717,8 @@ export default function useDashboardPageModel() {
     uploadMedia,
     updateCurrentPage,
     handlerDeletePage,
+    handlerPublishPage,
+    handlerUnPublishPage,
     handlerCreateSection,
     handlerUpdateSection,
     handlerDeleteSection,
