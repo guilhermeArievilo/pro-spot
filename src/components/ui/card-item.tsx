@@ -39,7 +39,7 @@ function RowItem({ title, subtitle, link, image, preview }: CardItemProps) {
         <span className="text-base font-semibold">{title}</span>
         {subtitle && <span className="text-xs">{subtitle}</span>}
       </div>
-      {link && <LinkButton inverse={!!image} href={link} />}
+      {link && <LinkButton inverse href={link} />}
     </div>
   );
 }

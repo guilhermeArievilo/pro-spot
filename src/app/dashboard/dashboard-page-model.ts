@@ -164,6 +164,10 @@ export default function useDashboardPageModel() {
     }
   }
 
+  function getPageUrl(page: Page) {
+    return `${BASEURL}/${page.slug}`;
+  }
+
   async function handlerPublishPage(page: Page) {
     await publishPage(page.id)
       .then((publishedAt) => {
@@ -171,7 +175,9 @@ export default function useDashboardPageModel() {
           ...prev!,
           publishedAt
         }));
-        toast(`A página "${page.name}" foi pulicada com sucesso !`);
+        toast(`A página "${page.name}" foi pulicada com sucesso !`, {
+          description: `Ela está disponível em: ${getPageUrl(page)}`
+        });
       })
       .catch(() => {
         toast('Ops', {
@@ -187,7 +193,9 @@ export default function useDashboardPageModel() {
           ...prev!,
           publishedAt
         }));
-        toast(`A página "${page.name}" foi despulicada com sucesso !`);
+        toast(`A página "${page.name}" foi despulicada com sucesso !`, {
+          description: 'Sua página não está mais disponível'
+        });
       })
       .catch(() => {
         toast('Ops', {

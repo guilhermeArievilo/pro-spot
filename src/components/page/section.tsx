@@ -19,7 +19,7 @@ export default function Section({
 }: SectionProps) {
   if (!items)
     return (
-      <section className="flex flex-col gap-4">
+      <section className="section-container flex flex-col gap-4">
         <HeaderSection
           title={title}
           subtitle={subtitle}
@@ -30,7 +30,7 @@ export default function Section({
 
   const groups = groupByType(items);
   return (
-    <section className="flex flex-col gap-4">
+    <section className="section-container flex flex-col gap-4">
       <HeaderSection
         title={title}
         subtitle={subtitle}

@@ -1,4 +1,5 @@
-import FooterLogo from '@/assets/svg/icons/footer-logo.svg';
+'use client';
+
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import WhatsappLogoIcon from '@/assets/svg/icons/whatsapp.svg';
@@ -10,6 +11,10 @@ import {
   LinkedInLogoIcon,
   OpenInNewWindowIcon
 } from '@radix-ui/react-icons';
+import { useRef } from 'react';
+
+import gsap from 'gsap';
+import { useGSAP } from '@gsap/react';
 
 interface FooterPageProps {
   instagram?: string;
@@ -30,9 +35,32 @@ export default function FooterPage({
   location,
   facebook
 }: FooterPageProps) {
+  const footerContainer = useRef(null);
+
+  useGSAP(
+    () => {
+      gsap.from('#contacts', {
+        translateX: 360,
+        opacity: 1,
+        delay: 3.5,
+        duration: 0.7,
+        ease: 'power2.inOut'
+      });
+    },
+    {
+      scope: footerContainer
+    }
+  );
+
   return (
-    <footer className="absolute bottom-0 left-0 w-full z-30 flex flex-col gap-2 justify-center items-center pb-2 pt-10">
-      <div className="flex justify-center items-center gap-2 p-2 bg-light-surfaceContainer/60 dark:bg-dark-surfaceContainerLowest/60 rounded-full backdrop-blur-sm">
+    <footer
+      ref={footerContainer}
+      className="absolute bottom-0 left-0 w-full z-30 flex flex-col gap-2 justify-center items-center pb-2 pt-10"
+    >
+      <div
+        id="contacts"
+        className="flex justify-center items-center gap-2 p-2 bg-light-surfaceContainer/60 dark:bg-dark-surfaceContainerLowest/60 rounded-full backdrop-blur-sm"
+      >
         {instagram && (
           <Button className="rounded-full" asChild>
             <Link href={instagram}>

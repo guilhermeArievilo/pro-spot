@@ -2,6 +2,7 @@ import FooterPage from '@/components/page/footer-page';
 import { HeaderPage } from '@/components/page/header-page';
 import { notFound } from 'next/navigation';
 import useSlugPageModel from './slug-page-model';
+import Introduce from '@/components/page/introduce';
 
 export default async function PageLayout({
   params,
@@ -18,6 +19,7 @@ export default async function PageLayout({
 
   return (
     <>
+      <Introduce page={page} />
       <div className="fixed top-0 left-0 w-full z-30">
         <div className="relative">
           <HeaderPage name={page.name} profileImage={page.photoProfile} />

@@ -65,7 +65,7 @@ export default function CardDialog({
         <div className="flex items-center justify-center">
           <div
             ref={cardRef}
-            className="text-center flex flex-col gap-6 bg-dark-surfaceContainerLowest p-10 rounded-3xl"
+            className="text-center flex flex-col gap-6 bg-dark-surfaceContainerLowest py-10 px-20 rounded-3xl"
           >
             <div className="flex flex-col items-center gap-2">
               <Avatar className="w-24 h-24">
