@@ -1,7 +1,6 @@
 import { PlusIcon } from '@radix-ui/react-icons';
 import { Button } from '../ui/button';
 import { Page } from '@/application/entities';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import PageMenu from './page-menu';
 import Link from 'next/link';
 
@@ -27,13 +26,17 @@ export default function DashboardMenu({
       ) : (
         <>
           {pages.map((page) => (
-            <button key={page.id} onClick={() => onPageClick(page)}>
+            <Link
+              href={'/dashboard'}
+              key={page.id}
+              onClick={() => onPageClick(page)}
+            >
               <PageMenu
                 name={page.name}
                 photoProfile={page.photoProfile}
                 isSelected={pageSelected ? pageSelected.id === page.id : false}
               />
-            </button>
+            </Link>
           ))}
         </>
       )}

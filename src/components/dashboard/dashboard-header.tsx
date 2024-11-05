@@ -17,6 +17,7 @@ import {
 } from '../ui/sheet';
 import { User } from '@/application/modules/user/entities';
 import { Separator } from '../ui/separator';
+import { useState } from 'react';
 
 interface DashboardHeaderProps {
   onPressToCreatePage: () => void;
@@ -31,13 +32,19 @@ export default function DashboardHeader({
   onSignOut,
   user
 }: DashboardHeaderProps) {
-  const { pages, pageSelected } = usePagesStore();
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const { pages, pageSelected, setSelectedPage } = usePagesStore();
 
   const fallbackChar = user.name.split(' ').reduce((prevName, currentName) => {
     return prevName
       ? prevName.split('')[0] + currentName.split('')[0]
       : currentName.split('')[0];
   }, '');
+
+  function onNavigateToProfile() {
+    setSheetOpen(false);
+    setSelectedPage(undefined);
+  }
   return (
     <header className="w-full flex items-center justify-between px-4 py-2 bg-background/60 backdrop-blur-md z-30">
       <Link href={'/dashboard/'}>
@@ -49,7 +56,7 @@ export default function DashboardHeader({
         pageSelected={pageSelected}
         onPageClick={handlePageClick}
       />
-      <Sheet>
+      <Sheet open={sheetOpen} onOpenChange={(open) => setSheetOpen(open)}>
         <SheetTrigger>
           <Avatar>
             <AvatarImage src={user.photoProfile?.src} />
@@ -72,8 +79,12 @@ export default function DashboardHeader({
               </span>
             </div>
             <Separator />
-            <Button variant={'secondary'}>Editar perfil</Button>
-            <Button variant={'secondary'}>Suporte</Button>
+            <Button variant={'secondary'} asChild>
+              <Link href={'/dashboard/profile'} onClick={onNavigateToProfile}>
+                Perfil
+              </Link>
+            </Button>
+            {/* <Button variant={'secondary'}>Suporte</Button> */}
             <Button variant={'destructive'} onClick={() => onSignOut()}>
               Sair
             </Button>

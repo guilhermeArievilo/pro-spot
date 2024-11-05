@@ -1,3 +1,6 @@
+'use client';
+
+import { Page } from '@/application/entities';
 import { PageSchema } from '@/application/modules/pages/entities';
 import useMediaModel from '@/application/modules/pages/presentation/models/media-model';
 import usePageModel from '@/application/modules/pages/presentation/models/page-model';
@@ -100,6 +103,10 @@ export default function useDashboardLayoutModel() {
       });
   }
 
+  async function handlerNavigateToPage(page: Page) {
+    setSelectedPage(page);
+  }
+
   useEffect(() => {
     if (user) {
       createUserIfNotExist(user);
@@ -126,6 +133,7 @@ export default function useDashboardLayoutModel() {
     toggleModalTrigger,
     handleCreatePage,
     setSelectedPage,
+    handlerNavigateToPage,
     user,
     userData,
     signOut

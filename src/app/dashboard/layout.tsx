@@ -23,7 +23,8 @@ export default function DashboardLayout({
     toggleModal,
     setToggleModal,
     uploadMedia,
-    handleCreatePage
+    handleCreatePage,
+    handlerNavigateToPage
   } = useDashboardLayoutModel();
 
   if (isLoading && !userData) {
@@ -38,7 +39,7 @@ export default function DashboardLayout({
     <>
       <DashboardScreen
         onPressToCreatePage={toggleModalTrigger}
-        navigateToPage={(page) => setSelectedPage(page)}
+        navigateToPage={handlerNavigateToPage}
         onSignOut={signOut}
         user={userData!}
       >

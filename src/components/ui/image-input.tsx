@@ -46,7 +46,9 @@ const ImageInput = React.forwardRef<HTMLInputElement, ImageInputProps>(
     };
 
     return (
-      <div className="w-fit flex items-center gap-3 dark:bg-dark-surfaceContainerLow bg-light-surfaceContainerLow rounded-full p-2">
+      <div
+        className={`w-fit flex items-center gap-3 dark:bg-dark-surfaceContainerLow bg-light-surfaceContainerLow rounded-full p-2 ${className}`}
+      >
         {(previewUrl || image?.src) && (
           <Avatar>
             <AvatarImage
@@ -61,10 +63,10 @@ const ImageInput = React.forwardRef<HTMLInputElement, ImageInputProps>(
           className="p-2"
           onClick={openFileSelectModal}
         >
-          {previewUrl || image?.src ? <EditIcon /> : <PlusIcon />}
+          {previewUrl || image?.src || value ? <EditIcon /> : <PlusIcon />}
         </Button>
 
-        {(previewUrl || image?.src) && enableDelete && (
+        {(previewUrl || image?.src || value) && enableDelete && (
           <Button
             variant={'ghost'}
             type="button"
