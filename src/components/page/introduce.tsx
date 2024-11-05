@@ -2,13 +2,12 @@
 
 import { Avatar, AvatarImage } from '../ui/avatar';
 import { GetPageResponse } from '@/application/modules/pages/entities';
-import AppLogo from '@/assets/svg/icons/footer-logo.svg';
 
 import { useRef } from 'react';
 
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
-import { duration } from 'html2canvas/dist/types/css/property-descriptors/duration';
+import { EASE_TYPE_DEFAULT } from '@/application/modules/pages/presentation/screens/page-screen/animation-config-values';
 
 interface Introduce {
   page: GetPageResponse;
@@ -23,28 +22,22 @@ export default function Introduce({ page }: Introduce) {
 
       tl.to('#in-avatar', {
         opacity: 1,
-        ease: 'power3.inOut',
+        ease: EASE_TYPE_DEFAULT,
         duration: 1
       })
         .to('#infos', {
           opacity: 1,
-          ease: 'power3.inOut',
+          ease: EASE_TYPE_DEFAULT,
           duration: 0.4
         })
         .from('#description', {
           opacity: 0,
-          ease: 'power3.inOut',
+          ease: EASE_TYPE_DEFAULT,
           duration: 0.3
-        })
-        .to('#app-logo', {
-          opacity: 1,
-          ease: 'power3.inOut',
-          delay: 0.5,
-          duration: 0.8
         })
         .to('#introduce-container', {
           translateY: -1000,
-          ease: 'power3.inOut',
+          ease: EASE_TYPE_DEFAULT,
           duration: 1
         });
     },
@@ -71,7 +64,6 @@ export default function Introduce({ page }: Introduce) {
           {page.content}
         </span>
       </div>
-      <AppLogo id="app-logo" className="w-6 opacity-0" />
     </div>
   );
 }

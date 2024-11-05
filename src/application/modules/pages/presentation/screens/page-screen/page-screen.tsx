@@ -10,6 +10,7 @@ import { useRef } from 'react';
 
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
+import { INTRODUCE_DURATION } from './animation-config-values';
 
 export interface PageScreenProps {
   page: GetPageResponse;
@@ -23,7 +24,7 @@ export default function PageScreen({ page, groups }: PageScreenProps) {
     () => {
       gsap.from('#hero .cover', {
         scale: 2,
-        delay: 3.5,
+        delay: INTRODUCE_DURATION,
         duration: 0.8,
         ease: 'power2.inOut'
       });
@@ -31,7 +32,7 @@ export default function PageScreen({ page, groups }: PageScreenProps) {
       gsap.from('.section-container', {
         translateX: 1000,
         scale: 2,
-        delay: 3.5,
+        delay: INTRODUCE_DURATION,
         duration: 1.5,
         stagger: 0.5,
         ease: 'power2.inOut'

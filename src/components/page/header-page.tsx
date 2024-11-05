@@ -6,6 +6,10 @@ import { useGSAP } from '@gsap/react';
 import { Media } from '@/application/entities';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { useRef } from 'react';
+import {
+  EASE_TYPE_DEFAULT,
+  INTRODUCE_DURATION
+} from '@/application/modules/pages/presentation/screens/page-screen/animation-config-values';
 
 interface HeaderPageProps {
   name: string;
@@ -29,9 +33,9 @@ export function HeaderPage({ name, lastName, profileImage }: HeaderPageProps) {
       gsap.from('#profile-container', {
         translateX: 360,
         opacity: 1,
-        delay: 3.5,
+        delay: INTRODUCE_DURATION,
         duration: 0.7,
-        ease: 'power2.inOut'
+        ease: EASE_TYPE_DEFAULT
       });
     },
     { scope: headerContainer }
