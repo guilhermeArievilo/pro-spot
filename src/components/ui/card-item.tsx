@@ -146,7 +146,7 @@ function LinkButton({
   href: string;
 }) {
   return (
-    <a
+    <Link
       href={href}
       className={cn(
         'self-start flex items-center justify-center px-3 py-3 rounded-full',
@@ -162,6 +162,6 @@ function LinkButton({
           'stroke-card': !inverse
         })}
       />
-    </a>
+    </Link>
   );
 }
