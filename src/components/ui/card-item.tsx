@@ -1,9 +1,10 @@
 import Image from 'next/image';
 import ArrowUpRight from '@/assets/svg/icons/arrow-up-right.svg';
-import Link from '@/assets/svg/icons/link.svg';
+import LinkIcon from '@/assets/svg/icons/link.svg';
 import { Button } from './button';
 import { cn } from '@/lib/utils';
 import { CardType, Media } from '@/application/entities';
+import Link from 'next/link';
 
 interface CardItemProps {
   title: string;
@@ -29,22 +30,15 @@ export default function CardItem(props: CardItemProps) {
   }
 }
 
-function RowItem({
-  title,
-  subtitle,
-  link,
-  image,
-  type,
-  preview
-}: CardItemProps) {
+function RowItem({ title, subtitle, link, image, preview }: CardItemProps) {
   return (
     <div className="flex justify-between dark:bg-light-surface bg-dark-scrim dark:text-light-onSurface text-dark-onSurface p-3 rounded-xl">
       <div className="flex flex-col">
-        {link && <Link />}
+        {link && <LinkIcon />}
         <span className="text-base font-semibold">{title}</span>
         {subtitle && <span className="text-xs">{subtitle}</span>}
       </div>
-      {link && <LinkButton inverse={!!image} />}
+      {link && <LinkButton inverse={!!image} href={link} />}
     </div>
   );
 }
@@ -76,9 +70,9 @@ function ColItem({
         />
       )}
       <div className="absolute w-full h-1/2 bottom-0 left-0 bg-gradient-to-b from-transparent to-background" />
-      {link && <LinkButton selfEnd />}
+      {link && <LinkButton selfEnd href={link} />}
       <div className="flex flex-col z-10">
-        {link && <Link />}
+        {link && <LinkIcon />}
         <span className="text-base font-semibold">{title}</span>
         {subtitle && <span className="text-xs">{subtitle}</span>}
       </div>
@@ -100,7 +94,7 @@ function BannerItem({ title, subtitle, link, image, type }: CardItemProps) {
       )}
       {link && (
         <div className="absolute w-full h-full flex justify-end p-4">
-          <LinkButton />
+          <LinkButton href={link} />
         </div>
       )}
     </div>
@@ -112,7 +106,7 @@ function ShowcaseItem({ title, subtitle, link, image, type }: CardItemProps) {
     <div className="relative w-full flex flex-col gap-2">
       {link && (
         <div className="absolute -top-2 left-2 w-full flex justify-end">
-          <LinkButton selfEnd />
+          <LinkButton selfEnd href={link} />
         </div>
       )}
       {image && (
@@ -133,18 +127,27 @@ function ShowcaseItem({ title, subtitle, link, image, type }: CardItemProps) {
 }
 
 function ButtonItem({ title, link }: CardItemProps) {
-  return <Button className="w-full">{title}</Button>;
+  return link ? (
+    <Link href={link}>
+      <Button className="w-full">{title}</Button>
+    </Link>
+  ) : (
+    <Button className="w-full">{title}</Button>
+  );
 }
 
 function LinkButton({
   inverse,
-  selfEnd
+  selfEnd,
+  href
 }: {
   inverse?: boolean;
   selfEnd?: boolean;
+  href: string;
 }) {
   return (
-    <div
+    <a
+      href={href}
       className={cn(
         'self-start flex items-center justify-center px-3 py-3 rounded-full',
         {
@@ -159,6 +162,6 @@ function LinkButton({
           'stroke-card': !inverse
         })}
       />
-    </div>
+    </a>
   );
 }
