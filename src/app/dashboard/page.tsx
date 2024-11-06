@@ -41,6 +41,7 @@ export default function ShowPage() {
     handlerPublishPage,
     handlerUnPublishPage
   } = useDashboardPageModel();
+
   if (!currentPage) {
     <main className="flex flex-col justify-center items-center">
       <span>Não encontramos sua página</span>

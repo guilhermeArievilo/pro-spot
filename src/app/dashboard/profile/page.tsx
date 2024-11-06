@@ -1,7 +1,6 @@
 'use client';
 
 import { mediaObjectSchema } from '@/application/entities';
-import useMediaModel from '@/application/modules/pages/presentation/models/media-model';
 import Loading from '@/components/loading';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -15,171 +14,227 @@ import {
 } from '@/components/ui/form';
 import { ImageInput } from '@/components/ui/image-input';
 import { Input } from '@/components/ui/input';
-import axiosInstance from '@/infra/http/axiosService';
-import { GraphQlClient } from '@/infra/http/onClientApolloService';
-import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
-import useUserStore from '@/store/uset';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import useProfileModel, { ProfileTabs } from './profile-model';
+import { RadioGroup, RadioGroupBlockItem } from '@/components/ui/radio-group';
+import { Separator } from '@/components/ui/separator';
 
-const formSchema = z.object({
-  name: z
-    .string({
-      message: 'Nome obrigatório'
-    })
-    .min(1, {
-      message: 'Nome obrigatório'
-    }),
-  lastName: z.string().optional(),
-  email: z.string().email(),
-  phoneNumber: z.string(),
-  photoProfile: mediaObjectSchema.optional()
-});
-
-type ProfileFormData = z.infer<typeof formSchema>;
+import AppLogo from '@/assets/svg/icons/footer-logo.svg';
+import useEditProfileModel from './edit-profile-model';
+import useSupportLeadAccount from './support-lead-account';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function ProfilePage() {
-  const pageRepository = new StrapiPagesApiRepository(
-    GraphQlClient,
-    axiosInstance
-  );
-  const { user } = useUserStore();
+  const {
+    profileOptionsTabs,
+    uploadProfilePhoto,
+    user,
+    currentTab,
+    setCurrentTab
+  } = useProfileModel();
 
   if (!user) return <Loading />;
 
-  const { uploadMedia } = useMediaModel({ pageRepository });
-  const form = useForm<ProfileFormData>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: user.name,
-      lastName: user.lastName,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      photoProfile: user.photoProfile
-    }
-  });
-
-  async function uploadProfilePhoto(photo: File) {
-    const uploadedPhoto = await uploadMedia(photo);
-
-    form.setValue('photoProfile', uploadedPhoto);
-  }
+  const { form: editProfileForm } = useEditProfileModel(user);
+  const { form: supportForm } = useSupportLeadAccount(user);
 
   return (
     <main className="container grid grid-cols-12 gap-6 py-36">
-      <div className="col-span-4 p-6 flex flex-col gap-6 border-r border-r-dark-outlineVariant">
-        <Button variant={'ghost'} className="w-full">
-          Seu perfil
-        </Button>
-        <Button variant={'ghost'} className="w-full">
-          Seu plano
-        </Button>
-        <Button variant={'ghost'} className="w-full">
-          Suporte para conta
-        </Button>
-        <Button variant={'destructive'} className="w-full">
-          Excluir conta
-        </Button>
-      </div>
-      <Form {...form}>
-        <form
-          className="col-span-8 flex flex-col gap-6"
-          onSubmit={form.handleSubmit((values) => console.log(values))}
+      <div className="col-span-4 p-6 h-full flex flex-col gap-6 border-r border-r-dark-outlineVariant">
+        <RadioGroup
+          defaultValue="profile"
+          onValueChange={(value: ProfileTabs) => setCurrentTab(value)}
         >
-          <div className="flex items-center justify-start gap-6">
-            <div className="relative">
-              <Avatar className="w-40 h-40">
-                <AvatarImage src={user.photoProfile?.src} />
-                <AvatarFallback>{user.name}</AvatarFallback>
-              </Avatar>
+          {profileOptionsTabs.map(({ label, tab }) => (
+            <RadioGroupBlockItem
+              value={tab}
+              className="w-full"
+              key={tab + '-tab'}
+            >
+              {label}
+            </RadioGroupBlockItem>
+          ))}
+        </RadioGroup>
+        <Separator />
+        <Button variant={'destructive'}>Excluir conta</Button>
+      </div>
+      <div className="col-span-8 ">
+        {currentTab === 'profile' && (
+          <Form {...editProfileForm} key="profile">
+            <form
+              className="flex flex-col gap-6"
+              onSubmit={editProfileForm.handleSubmit((values) =>
+                console.log(values)
+              )}
+            >
+              <div className="flex items-center justify-start gap-6">
+                <div className="relative">
+                  <Avatar className="w-40 h-40">
+                    <AvatarImage src={user.photoProfile?.src} />
+                    <AvatarFallback>{user.name}</AvatarFallback>
+                  </Avatar>
+                  <FormField
+                    control={editProfileForm.control}
+                    name="photoProfile"
+                    render={({ field }) => (
+                      <FormItem className="absolute top-0 -right-4">
+                        <FormControl>
+                          <ImageInput
+                            {...field}
+                            value={field.value?.src}
+                            onChange={(e) => {
+                              uploadProfilePhoto(
+                                e.target.files?.[0]!,
+                                (photo) => {
+                                  editProfileForm.setValue(
+                                    'photoProfile',
+                                    photo
+                                  );
+                                }
+                              );
+                            }}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-3xl">
+                    {user.lastName
+                      ? `${user.name} ${user.lastName}`
+                      : user.name}
+                  </span>
+                  <span className="text-sm text-dark-outline">Plano FREE</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-12 gap-6">
+                <FormField
+                  control={editProfileForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-6">
+                      <FormLabel>Nome</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Nome" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editProfileForm.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem className="col-span-6">
+                      <FormLabel>Sobrenome</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Sobrenome" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editProfileForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="col-span-6">
+                      <FormLabel>E-mail</FormLabel>
+                      <FormControl>
+                        <Input placeholder="E-mail" {...field} disabled />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={editProfileForm.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem className="col-span-6">
+                      <FormLabel>Número de celular</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Número" {...field} disabled />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="col-span-12 flex justify-center">
+                  <Button type="submit" className="w-60">
+                    Salvar
+                  </Button>
+                </div>
+              </div>
+            </form>
+          </Form>
+        )}
+        {currentTab === 'plan' && (
+          <div className="h-full flex flex-col justify-center items-center gap-6">
+            <div className="flex items-center gap-6">
+              <AppLogo className="w-44 h-44 fill-foreground" />
+              <span>FREE</span>
+            </div>
+            <Button disabled className="w-36">
+              Trocar plano
+            </Button>
+          </div>
+        )}
+        {currentTab === 'account-support' && (
+          <Form {...supportForm}>
+            <form
+              className="flex flex-col gap-6"
+              onSubmit={supportForm.handleSubmit((values) =>
+                console.log(values)
+              )}
+            >
+              <div className="flex flex-col gap-1">
+                <span className="text-2xl">Suporte a sua conta</span>
+                <p className="text-sm text-light-onSurfaceVariant dark:text-dark-onSurfaceVariant">
+                  Deixe uma mensagem sobre o seu problema, que iremos entrar em
+                  contato assim que possível.
+                </p>
+              </div>
               <FormField
-                control={form.control}
-                name="photoProfile"
+                control={supportForm.control}
+                name="subject"
                 render={({ field }) => (
-                  <FormItem className="absolute top-0 -right-4">
+                  <FormItem>
+                    <FormLabel>Assunto</FormLabel>
                     <FormControl>
-                      <ImageInput
+                      <Input placeholder="Insira um assunto aqui" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={supportForm.control}
+                name="message"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mensagem</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Insira uma mensagem explicando seu problema aqui"
                         {...field}
-                        value={field.value?.src}
-                        onChange={(e) => {
-                          uploadProfilePhoto(e.target.files?.[0]!);
-                        }}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-3xl">
-                {user.lastName ? `${user.name} ${user.lastName}` : user.name}
-              </span>
-              <span className="text-sm text-dark-outline">Plano FREE</span>
-            </div>
-          </div>
-          <div className="grid grid-cols-12 gap-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem className="col-span-6">
-                  <FormLabel>Nome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Nome" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem className="col-span-6">
-                  <FormLabel>Sobrenome</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Sobrenome" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem className="col-span-6">
-                  <FormLabel>E-mail</FormLabel>
-                  <FormControl>
-                    <Input placeholder="E-mail" {...field} disabled />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="phoneNumber"
-              render={({ field }) => (
-                <FormItem className="col-span-6">
-                  <FormLabel>Número de celular</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Número" {...field} disabled />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="col-span-12 flex justify-center">
-              <Button type="submit" className="w-60">
-                Salvar
-              </Button>
-            </div>
-          </div>
-        </form>
-      </Form>
+              <div className="flex justify-center">
+                <Button type="submit" className="w-60">
+                  Enviar
+                </Button>
+              </div>
+            </form>
+          </Form>
+        )}
+      </div>
     </main>
   );
 }
