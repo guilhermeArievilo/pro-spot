@@ -1,5 +1,9 @@
 import { mediaObjectSchema } from '@/application/entities';
+import useUserModel from '@/application/modules/pages/presentation/models/user-model';
 import { User } from '@/application/modules/user/entities';
+import axiosInstance from '@/infra/http/axiosService';
+import { GraphQlClient } from '@/infra/http/onClientApolloService';
+import StrapiUserRepository from '@/infra/http/strapi/users/repository/strapi-user-repository';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';

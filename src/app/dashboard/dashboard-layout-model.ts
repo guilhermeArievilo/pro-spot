@@ -43,6 +43,7 @@ export default function useDashboardLayoutModel() {
   async function fetchPages(userId: string) {
     const pages = await fetchPagesByUserId(userId);
     if (!pages) {
+      setPages([]);
       setToggleModal(true);
       return;
     }
@@ -107,6 +108,12 @@ export default function useDashboardLayoutModel() {
     setSelectedPage(page);
   }
 
+  async function handlerSignOut() {
+    await signOut().then(() => {
+      setPages([]);
+    });
+  }
+
   useEffect(() => {
     if (user) {
       createUserIfNotExist(user);
@@ -136,6 +143,6 @@ export default function useDashboardLayoutModel() {
     handlerNavigateToPage,
     user,
     userData,
-    signOut
+    handlerSignOut
   };
 }

@@ -14,8 +14,7 @@ import {
 } from '@/components/ui/form';
 import { ImageInput } from '@/components/ui/image-input';
 import { Input } from '@/components/ui/input';
-import { z } from 'zod';
-import useProfileModel, { ProfileTabs } from './profile-model';
+import useProfileModel, { ProfileTabs } from './profile-viewmodel';
 import { RadioGroup, RadioGroupBlockItem } from '@/components/ui/radio-group';
 import { Separator } from '@/components/ui/separator';
 
@@ -23,6 +22,7 @@ import AppLogo from '@/assets/svg/icons/footer-logo.svg';
 import useEditProfileModel from './edit-profile-model';
 import useSupportLeadAccount from './support-lead-account';
 import { Textarea } from '@/components/ui/textarea';
+import DeleteUserDialog from '@/application/modules/user/presentation/screens/delete-page-screen/delete-user-dialog';
 
 export default function ProfilePage() {
   const {
@@ -30,7 +30,11 @@ export default function ProfilePage() {
     uploadProfilePhoto,
     user,
     currentTab,
-    setCurrentTab
+    setCurrentTab,
+    handlerEditProfileSubmit,
+    deleteUserDialogOpen,
+    setDeleteUserDialogOpen,
+    handlerDeleteProfile
   } = useProfileModel();
 
   if (!user) return <Loading />;
@@ -56,16 +60,20 @@ export default function ProfilePage() {
           ))}
         </RadioGroup>
         <Separator />
-        <Button variant={'destructive'}>Excluir conta</Button>
+        <Button
+          variant={'destructive'}
+          onClick={() => setDeleteUserDialogOpen(true)}
+          type="button"
+        >
+          Excluir conta
+        </Button>
       </div>
       <div className="col-span-8 ">
         {currentTab === 'profile' && (
           <Form {...editProfileForm} key="profile">
             <form
               className="flex flex-col gap-6"
-              onSubmit={editProfileForm.handleSubmit((values) =>
-                console.log(values)
-              )}
+              onSubmit={editProfileForm.handleSubmit(handlerEditProfileSubmit)}
             >
               <div className="flex items-center justify-start gap-6">
                 <div className="relative">
@@ -235,6 +243,12 @@ export default function ProfilePage() {
           </Form>
         )}
       </div>
+      <DeleteUserDialog
+        user={user}
+        open={deleteUserDialogOpen}
+        onChangeOpen={setDeleteUserDialogOpen}
+        onSubmitConfirm={handlerDeleteProfile}
+      />
     </main>
   );
 }

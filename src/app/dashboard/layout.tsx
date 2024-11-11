@@ -19,7 +19,7 @@ export default function DashboardLayout({
     userData,
     setSelectedPage,
     toggleModalTrigger,
-    signOut,
+    handlerSignOut,
     toggleModal,
     setToggleModal,
     uploadMedia,
@@ -40,7 +40,7 @@ export default function DashboardLayout({
       <DashboardScreen
         onPressToCreatePage={toggleModalTrigger}
         navigateToPage={handlerNavigateToPage}
-        onSignOut={signOut}
+        onSignOut={handlerSignOut}
         user={userData!}
       >
         {children}

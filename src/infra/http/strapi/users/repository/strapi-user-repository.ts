@@ -4,6 +4,8 @@ import { ApolloClient, gql } from '@apollo/client';
 import { AxiosInstance } from 'axios';
 import { toUserDomain } from '../mappers/strapi-user-mappers';
 
+import qs from 'qs';
+
 export default class StrapiUserRepository implements UserRepository {
   constructor(
     private ApolloClientService: ApolloClient<any>,
@@ -78,5 +80,47 @@ export default class StrapiUserRepository implements UserRepository {
     }
 
     return toUserDomain(result.data.data);
+  }
+
+  async updateUser({
+    id,
+    userData: { name, lastName, photoProfile }
+  }: {
+    id: string;
+    userData: UserScheme;
+  }): Promise<User> {
+    const bodyData = {
+      name,
+      lastName
+    };
+
+    if (photoProfile) {
+      Object.assign(bodyData, {
+        photoProfile: {
+          set: [photoProfile]
+        }
+      });
+    }
+
+    const query = qs.stringify({
+      populate: ['photoProfile']
+    });
+
+    const remoteUser = await this.AxiosClientService.put(
+      `/app-users/${id}?${query}`,
+      {
+        data: bodyData
+      }
+    );
+
+    if (!remoteUser?.data) {
+      throw new Error('Could not update user');
+    }
+
+    return toUserDomain(remoteUser.data.data);
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    await this.AxiosClientService.delete(`/app-users/${id}`);
   }
 }
