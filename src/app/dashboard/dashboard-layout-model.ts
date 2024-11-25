@@ -6,6 +6,7 @@ import useMediaModel from '@/application/modules/pages/presentation/models/media
 import usePageModel from '@/application/modules/pages/presentation/models/page-model';
 import useUserModel from '@/application/modules/pages/presentation/models/user-model';
 import axiosInstance from '@/infra/http/axiosService';
+import BackendUserRepository from '@/infra/http/backend/user/repository/backend-user-repository';
 import { GraphQlClient } from '@/infra/http/onClientApolloService';
 import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
 import StrapiUserRepository from '@/infra/http/strapi/users/repository/strapi-user-repository';
@@ -17,7 +18,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function useDashboardLayoutModel() {
-  const userRepository = new StrapiUserRepository(GraphQlClient, axiosInstance);
+  const userRepository = new BackendUserRepository(axiosInstance);
   const pageRepository = new StrapiPagesApiRepository(
     GraphQlClient,
     axiosInstance
@@ -31,13 +32,13 @@ export default function useDashboardLayoutModel() {
   const { createPage, fetchPagesByUserId } = usePageModel({ pageRepository });
   const { uploadMedia } = useMediaModel({ pageRepository });
 
-  const { createUser, fetchUserByAuthServiceId } = useUserModel({
+  const { createUser, authenticate, getUser } = useUserModel({
     userRepository
   });
 
   const [isLoading, setIsLoading] = useState(true);
   const [onError, setError] = useState(false);
-  const { setUser, user: userData } = useUserStore();
+  const { setUser, user: userData, setJwtToken } = useUserStore();
   const { setPages, setSelectedPage, pages } = usePagesStore();
 
   async function fetchPages(userId: string) {
@@ -51,7 +52,16 @@ export default function useDashboardLayoutModel() {
   }
 
   async function createUserIfNotExist(user: UserResource) {
-    const fetchedUser = await fetchUserByAuthServiceId(user.id);
+    const fetchedUser = await authenticate(user.id)
+      .then(async ({ accessToken }) => {
+        setJwtToken(accessToken);
+        const user = await getUser();
+        return {
+          ...user,
+          authId: user.id
+        };
+      })
+      .catch(() => null);
 
     if (!fetchedUser && user) {
       const createdUser = await createUser({

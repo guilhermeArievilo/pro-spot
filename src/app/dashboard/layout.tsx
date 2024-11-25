@@ -15,9 +15,7 @@ export default function DashboardLayout({
   const {
     isLoading,
     onError,
-    user,
     userData,
-    setSelectedPage,
     toggleModalTrigger,
     handlerSignOut,
     toggleModal,

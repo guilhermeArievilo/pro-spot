@@ -18,3 +18,8 @@ export type UserScheme = {
   phoneNumber?: string;
   photoProfile?: string | number;
 };
+
+export type AuthenticateData = {
+  accessToken: string;
+  expiresIn: number;
+};

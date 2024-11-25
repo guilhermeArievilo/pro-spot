@@ -1,4 +1,8 @@
-import { User, UserScheme } from '@/application/modules/user/entities';
+import {
+  AuthenticateData,
+  User,
+  UserScheme
+} from '@/application/modules/user/entities';
 import UserRepository from '@/application/modules/user/repository/user-repository';
 import { ApolloClient, gql } from '@apollo/client';
 import { AxiosInstance } from 'axios';
@@ -11,6 +15,14 @@ export default class StrapiUserRepository implements UserRepository {
     private ApolloClientService: ApolloClient<any>,
     private AxiosClientService: AxiosInstance
   ) {}
+
+  setJwtToken(token: string): void {
+    throw new Error('Method not implemented.');
+  }
+
+  authenticate(userServiceAuthId: string): Promise<AuthenticateData> {
+    throw new Error('Method not implemented.');
+  }
 
   async getUserByAuthServiceId(
     userServiceAuthId: string
