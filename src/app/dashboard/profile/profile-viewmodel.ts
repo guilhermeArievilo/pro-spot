@@ -14,6 +14,8 @@ import { ProfileFormData } from './edit-profile-model';
 import { toast } from 'sonner';
 import { useAuth, useUser } from '@clerk/nextjs';
 import Router from 'next/router';
+import BackendUserRepository from '@/infra/http/backend/user/repository/backend-user-repository';
+import BackendPagesRepository from '@/infra/http/backend/pages/repository/backend-pages-repository';
 
 export const profileOptionsTabs = [
   {
@@ -34,20 +36,23 @@ export type ProfileTabs = 'profile' | 'plan' | 'account-support';
 
 export default function useProfileModel() {
   const { user: clerkUser } = useUser();
+  const { jwtToken, isAuthenticated } = useUserStore();
   const { signOut } = useAuth();
 
   const [deleteUserDialogOpen, setDeleteUserDialogOpen] = useState(false);
   const [currentTab, setCurrentTab] = useState<ProfileTabs>('profile');
 
-  const userRepository = new StrapiUserRepository(GraphQlClient, axiosInstance);
+  const userRepository = new BackendUserRepository(axiosInstance);
   const { updateUser, deleteUser } = useUserModel({
     userRepository
   });
 
-  const pageRepository = new StrapiPagesApiRepository(
-    GraphQlClient,
-    axiosInstance
-  );
+  const pageRepository = new BackendPagesRepository(axiosInstance);
+
+  if (isAuthenticated) {
+    userRepository.setJwtToken(jwtToken!);
+    pageRepository.setToken(jwtToken!);
+  }
 
   const { uploadMedia } = useMediaModel({ pageRepository });
 
