@@ -21,7 +21,40 @@ const SocialInput = React.forwardRef<HTMLInputElement, SocialInputProps>(
       setToggleInput(!toggleInput);
     }
 
-    function cleanValue() {}
+    function cleanValue() {
+      onChangeValue('');
+    }
+
+    function onChangeValue(value: string) {
+      if (props && props.onChange) {
+        const input = document.createElement('input');
+        input.value = value;
+
+        // Cria o evento base
+        const event = new Event('input', { bubbles: true, cancelable: true });
+
+        // Adiciona as propriedades necessárias do ChangeEvent
+        const changeEvent: React.ChangeEvent<HTMLInputElement> = {
+          target: input,
+          currentTarget: input,
+          bubbles: event.bubbles,
+          cancelable: event.cancelable,
+          defaultPrevented: event.defaultPrevented,
+          eventPhase: event.eventPhase,
+          isTrusted: event.isTrusted,
+          nativeEvent: event as any,
+          preventDefault: event.preventDefault.bind(event),
+          stopPropagation: event.stopPropagation.bind(event),
+          persist: () => {},
+          isDefaultPrevented: event.defaultPrevented ? () => true : () => false,
+          isPropagationStopped: event.cancelBubble ? () => true : () => false,
+          timeStamp: event.timeStamp,
+          type: event.type
+        };
+
+        props.onChange(changeEvent);
+      }
+    }
     return (
       <div className="w-fit flex items-center gap-2 p-2 dark:bg-dark-surfaceContainerLow bg-light-surfaceContainerLow rounded-full">
         <div>{children}</div>
