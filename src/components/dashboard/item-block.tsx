@@ -96,14 +96,12 @@ export default function ItemBlock({
   }
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const { title, subtitle, link, image } = values;
+    const { image } = values;
 
     if (onSave) {
       const formData = {
-        title: title !== itemBackup?.title ? title : undefined,
-        subtitle: subtitle !== itemBackup?.subtitle ? subtitle : undefined,
-        link: link !== itemBackup?.link ? link : undefined,
-        type: type !== itemBackup?.type ? type : undefined,
+        ...values,
+        type,
         image: image?.id !== itemBackup?.image?.id ? image?.id : undefined
       };
 

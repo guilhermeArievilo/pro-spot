@@ -3,6 +3,7 @@ import {
   CardType,
   Item,
   Media,
+  Page,
   Section
 } from '@/application/entities';
 
@@ -50,6 +51,7 @@ export type SectionSchema = {
   subtitle?: string;
   alignContent?: AlignContent;
   items?: string[];
+  pageId?: string;
 };
 
 export type ItemSchema = {
@@ -59,4 +61,6 @@ export type ItemSchema = {
   link?: string;
   type?: CardType;
   image?: string | number;
+  sectionId?: string;
+  pageId?: string;
 };

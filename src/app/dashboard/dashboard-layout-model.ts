@@ -2,14 +2,13 @@
 
 import { Page } from '@/application/entities';
 import { PageSchema } from '@/application/modules/pages/entities';
-import useMediaModel from '@/application/modules/pages/presentation/models/media-model';
-import usePageModel from '@/application/modules/pages/presentation/models/page-model';
 import useUserModel from '@/application/modules/pages/presentation/models/user-model';
+import CreatePageUsecase from '@/application/modules/pages/usecases/create-page-usecase';
+import GetPagesByUserId from '@/application/modules/pages/usecases/get-pages-by-user-id';
+import UploadMediaUsecase from '@/application/modules/pages/usecases/upload-media-usecase';
 import axiosInstance from '@/infra/http/axiosService';
+import BackendPagesRepository from '@/infra/http/backend/pages/repository/backend-pages-repository';
 import BackendUserRepository from '@/infra/http/backend/user/repository/backend-user-repository';
-import { GraphQlClient } from '@/infra/http/onClientApolloService';
-import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
-import StrapiUserRepository from '@/infra/http/strapi/users/repository/strapi-user-repository';
 import usePagesStore from '@/store/pages';
 import useUserStore from '@/store/uset';
 import { useAuth, useUser } from '@clerk/nextjs';
@@ -19,18 +18,11 @@ import { toast } from 'sonner';
 
 export default function useDashboardLayoutModel() {
   const userRepository = new BackendUserRepository(axiosInstance);
-  const pageRepository = new StrapiPagesApiRepository(
-    GraphQlClient,
-    axiosInstance
-  );
 
   const { signOut } = useAuth();
   const { user, isLoaded } = useUser();
 
   const [toggleModal, setToggleModal] = useState(false);
-
-  const { createPage, fetchPagesByUserId } = usePageModel({ pageRepository });
-  const { uploadMedia } = useMediaModel({ pageRepository });
 
   const { createUser, authenticate, getUser } = useUserModel({
     userRepository
@@ -38,18 +30,14 @@ export default function useDashboardLayoutModel() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [onError, setError] = useState(false);
-  const { setUser, user: userData, setJwtToken } = useUserStore();
-  const { setPages, setSelectedPage, pages } = usePagesStore();
-
-  async function fetchPages(userId: string) {
-    const pages = await fetchPagesByUserId(userId);
-    if (!pages) {
-      setPages([]);
-      setToggleModal(true);
-      return;
-    }
-    setPages(pages);
-  }
+  const {
+    setUser,
+    user: userData,
+    setJwtToken,
+    jwtToken,
+    isAuthenticated
+  } = useUserStore();
+  const { setPages, setSelectedPage, pages, fetchPages } = usePagesStore();
 
   async function createUserIfNotExist(user: UserResource) {
     const fetchedUser = await authenticate(user.id)
@@ -64,13 +52,18 @@ export default function useDashboardLayoutModel() {
       .catch(() => null);
 
     if (!fetchedUser && user) {
-      const createdUser = await createUser({
-        authId: user.id,
-        name: user.firstName!,
-        email: user.primaryEmailAddress?.emailAddress!,
-        lastName: user.lastName!,
-        phoneNumber: user.phoneNumbers[0]?.phoneNumber!
-      });
+      const createdUser = await createUser(
+        {
+          authId: user.id,
+          name: user.firstName!,
+          email: user.primaryEmailAddress?.emailAddress!,
+          lastName: user.lastName!,
+          phoneNumber: user.phoneNumbers[0]?.phoneNumber!
+        },
+        (token) => {
+          setJwtToken(token);
+        }
+      );
 
       if (!createdUser) {
         setIsLoading(false);
@@ -97,7 +90,11 @@ export default function useDashboardLayoutModel() {
     if (!userData?.id) return;
     const { id } = userData;
 
-    await createPage(data, id)
+    const pageRepository = new BackendPagesRepository(axiosInstance, jwtToken);
+    const createPageCase = new CreatePageUsecase(pageRepository);
+
+    await createPageCase
+      .execute(data, id)
       .then((page) => {
         if (pages.length) {
           setPages([...pages, page]);
@@ -112,6 +109,14 @@ export default function useDashboardLayoutModel() {
           description: 'Por algum motivo não conseguimos criar sua página'
         });
       });
+  }
+
+  async function uploadMedia(media: File) {
+    const pageRepository = new BackendPagesRepository(axiosInstance, jwtToken);
+
+    const uploadMediaCase = new UploadMediaUsecase(pageRepository);
+
+    return await uploadMediaCase.execute(media);
   }
 
   async function handlerNavigateToPage(page: Page) {
@@ -131,10 +136,10 @@ export default function useDashboardLayoutModel() {
   }, [user]);
 
   useEffect(() => {
-    if (userData) {
-      fetchPages(userData?.id as string);
+    if (userData && isAuthenticated) {
+      fetchPages();
     }
-  }, [userData]);
+  }, [userData, isAuthenticated]);
 
   function toggleModalTrigger() {
     setToggleModal((prev) => !prev);

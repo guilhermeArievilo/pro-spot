@@ -6,6 +6,7 @@ import CreateSectionItemUsecase from '../../usecases/create-section-item';
 import UpdateItemUsecase from '../../usecases/update-item-usecase';
 import DeleteItemUsecase from '../../usecases/delete-item-usecase';
 import PublishItemUsecase from '../../usecases/publish-item-usecase';
+import UnpublishItemUsecase from '../../usecases/unpublish-item-usecase';
 
 interface useItemModelProps {
   pageRepository: PageRepository;
@@ -57,9 +58,9 @@ export default function useItemModel({ pageRepository }: useItemModelProps) {
   }
 
   async function unPublishItem(itemId: string) {
-    const publishItemCase = new PublishItemUsecase(pageRepository);
+    const unPublishItemCase = new UnpublishItemUsecase(pageRepository);
 
-    await publishItemCase.execute(itemId);
+    await unPublishItemCase.execute(itemId);
 
     return null;
   }

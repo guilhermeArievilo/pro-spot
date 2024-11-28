@@ -35,6 +35,7 @@ import PlayIcon from '@/assets/svg/icons/play.svg';
 import PauseIcon from '@/assets/svg/icons/pause.svg';
 import TrashIcon from '@/assets/svg/icons/trash.svg';
 import DeletePageDialog from '@/application/modules/pages/presentation/screens/delete-page-screen/delete-page-dialog';
+import BackendPagesRepository from '@/infra/http/backend/pages/repository/backend-pages-repository';
 interface GeralInfoDataProps {
   page: Page;
   onUpdatePage?: (page: Page) => void;
@@ -50,10 +51,7 @@ const formSchema = z.object({
     .min(1, 'O nome é obrigatório')
     .refine(
       async (nome) => {
-        const pagesRepository = new StrapiPagesApiRepository(
-          GraphQlClient,
-          axiosInstance
-        );
+        const pagesRepository = new BackendPagesRepository(axiosInstance);
         const getPageBySlugCase = new GetPageUsecase(pagesRepository);
 
         const page = await getPageBySlugCase.execute(createSlug(nome));
@@ -127,39 +125,13 @@ export default function GeralInfoData({
   }
 
   const onSubmit = (data: GeralInfoFormData) => {
-    const {
-      name,
-      content,
-      instagram,
-      x,
-      whatsapp,
-      linkedin,
-      facebook,
-      locationLink,
-      photoProfile,
-      backgroundMedia
-    } = data;
+    const { photoProfile, backgroundMedia } = data;
 
     if (onSubmitGeralInfo) {
       const formData = {
-        slug: name !== pageBackup?.name ? createSlug(name) : undefined,
-        name: name !== pageBackup?.name ? name : undefined,
-        content: content !== pageBackup?.content ? content : undefined,
-        instagram: instagram !== pageBackup?.instagram ? instagram : undefined,
-        x: x !== pageBackup?.x ? x : undefined,
-        whatsapp: whatsapp !== pageBackup?.whatsapp ? whatsapp : undefined,
-        linkedin: linkedin !== pageBackup?.linkedin ? linkedin : undefined,
-        facebook: facebook !== pageBackup?.facebook ? facebook : undefined,
-        locationLink:
-          locationLink !== pageBackup?.locationLink ? locationLink : undefined,
-        photoProfile:
-          photoProfile.id === pageBackup?.photoProfile.id
-            ? undefined
-            : photoProfile.id,
-        backgroundMedia:
-          backgroundMedia.id === pageBackup?.backgroundMedia.id
-            ? undefined
-            : backgroundMedia.id
+        ...data,
+        photoProfile: photoProfile.id,
+        backgroundMedia: backgroundMedia.id
       };
 
       onSubmitGeralInfo(formData);

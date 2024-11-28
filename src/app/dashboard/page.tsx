@@ -9,10 +9,10 @@ import ConfirmAction from '@/components/dashboard/confirm-action';
 import CreateSectionEntry from '@/components/dashboard/create-section-entry';
 import CardDialog from '@/components/dashboard/CardDialog';
 import useDashboardPageModel from './dashboard-page-model';
+import usePagesStore from '@/store/pages';
 
 export default function ShowPage() {
   const {
-    currentPage,
     sharePage,
     navigationMenuPage,
     setCurrentTab,
@@ -29,7 +29,6 @@ export default function ShowPage() {
     handlerCreateSection,
     liveUpdateItem,
     uploadMedia,
-    setCurrentPage,
     updateCurrentPage,
     handlerDeletePage,
     confirmActionData,
@@ -42,7 +41,9 @@ export default function ShowPage() {
     handlerUnPublishPage
   } = useDashboardPageModel();
 
-  if (!currentPage) {
+  const { pageSelected, setSelectedPage } = usePagesStore();
+
+  if (!pageSelected) {
     <main className="flex flex-col justify-center items-center">
       <span>Não encontramos sua página</span>
     </main>;
@@ -50,35 +51,35 @@ export default function ShowPage() {
 
   return (
     <main className="max-h-full w-full grid grid-cols-12 gap-6 pt-4 px-4">
-      {currentPage && (
+      {pageSelected && (
         <div className="col-span-12">
           <TopBodyMenu
-            pageName={currentPage.name}
+            pageName={pageSelected.name}
             onSharedPress={sharePage}
             options={navigationMenuPage}
             defaultOption={navigationMenuPage[0].value}
             onOptionChange={(opionValue) => {
               setCurrentTab(opionValue);
             }}
-            views={currentPage.views}
+            views={pageSelected.views}
           />
         </div>
       )}
-      {currentPage && (
+      {pageSelected && (
         <div className="col-span-3 h-full flex items-center justify-center overflow-hidden pb-4">
           <div className="h-full aspect-[9/16] overflow-hidden">
-            <Preview page={currentPage} />
+            <Preview page={pageSelected} />
           </div>
         </div>
       )}
-      {currentPage && (
+      {pageSelected && (
         <div className="col-span-9 h-full overflow-y-auto px-6">
           {currentTab === 'content' && (
             <div className="w-full flex flex-col gap-16 pb-4">
               <div className="flex flex-col items-center gap-4">
                 <span className="text-2xl w-full">Secções</span>
                 <div className="w-full flex flex-col gap-6">
-                  {currentPage.sectionsPages?.map((section, index) => (
+                  {pageSelected.sectionsPages?.map((section, index) => (
                     <SectionBlock
                       key={section.id}
                       section={section}
@@ -87,7 +88,15 @@ export default function ShowPage() {
                       onSave={(currentSection) => {
                         handlerUpdateSection(currentSection, section.id);
                       }}
-                      onItemSave={(item, id) => handlerUpdateItem(item, id)}
+                      onItemSave={(item, id) =>
+                        handlerUpdateItem(
+                          {
+                            ...item,
+                            sectionId: section.id
+                          },
+                          id
+                        )
+                      }
                       onCreateItem={(entry) =>
                         handlerCreateItem(entry, section.id)
                       }
@@ -126,7 +135,7 @@ export default function ShowPage() {
                     />
                   ))}
                 </div>
-                {!!currentPage.sectionsPages?.length && (
+                {!!pageSelected.sectionsPages?.length && (
                   <div className="h-6 w-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
                 )}
                 <CreateSectionEntry onCreateASection={handlerCreateSection} />
@@ -134,7 +143,7 @@ export default function ShowPage() {
               <div className="flex flex-col items-center gap-4">
                 <span className="text-2xl w-full">Itens Avulsos</span>
                 <div className="w-full flex flex-col gap-6">
-                  {currentPage?.items?.map((item, index) => (
+                  {pageSelected?.items?.map((item, index) => (
                     <ItemBlock
                       key={item.id}
                       item={item}
@@ -161,7 +170,7 @@ export default function ShowPage() {
                     />
                   ))}
                 </div>
-                {!!currentPage.items?.length && (
+                {!!pageSelected.items?.length && (
                   <div className="h-6 w-[1px] dark:bg-dark-outlineVariant bg-light-outlineVariant" />
                 )}
                 <CreateItemRotine
@@ -173,16 +182,16 @@ export default function ShowPage() {
           )}
           {currentTab === 'geral' && (
             <GeralInfoData
-              key={currentPage.id}
-              page={currentPage}
-              onUpdatePage={setCurrentPage}
+              key={pageSelected.id}
+              page={pageSelected}
+              onUpdatePage={setSelectedPage}
               onSubmitGeralInfo={updateCurrentPage}
               onUploadMedia={uploadMedia}
               onDelete={handlerDeletePage}
-              togglePublish={(currentPage) => {
-                currentPage.publishedAt
-                  ? handlerUnPublishPage(currentPage)
-                  : handlerPublishPage(currentPage);
+              togglePublish={(pageSelected) => {
+                pageSelected.publishedAt
+                  ? handlerUnPublishPage(pageSelected)
+                  : handlerPublishPage(pageSelected);
               }}
             />
           )}
@@ -200,10 +209,10 @@ export default function ShowPage() {
         }}
         onConfirm={onDeleteConfirmation}
       />
-      {currentPage && (
+      {pageSelected && (
         <CardDialog
-          page={currentPage}
-          key={currentPage.id}
+          page={pageSelected}
+          key={pageSelected.id}
           open={cardDialogOpen}
           onChangeOpen={(isOpen) => setCardDialogOpen(isOpen)}
           qrCode={qrCode}

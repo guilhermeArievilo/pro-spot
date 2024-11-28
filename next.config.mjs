@@ -22,9 +22,9 @@ const nextConfig = {
       // },
       {
         protocol: 'http',
-        hostname: process.env.NEXT_PUBLIC_STRAPI_API_HOSTNAME || 'localhost',
-        port: process.env.NEXT_PUBLIC_STRAPI_API_PORT || '',
-        pathname: '/uploads/**/*'
+        hostname: 'localhost',
+        port: '8080',
+        pathname: '/uploads/**' // Permite todas as imagens dentro de /uploads/
       }
     ]
   }

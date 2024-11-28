@@ -4,9 +4,15 @@ import UserRepository from '../repository/user-repository';
 export default class CreateUserUsecase {
   constructor(private repository: UserRepository) {}
 
-  async execute(toCreateUser: UserScheme): Promise<User | null> {
+  async execute(
+    toCreateUser: UserScheme,
+    injectJwtProperties?: (token: string, expiresIn: number) => void
+  ): Promise<User | null> {
     try {
-      const user = await this.repository.createUser(toCreateUser);
+      const user = await this.repository.createUser(
+        toCreateUser,
+        injectJwtProperties
+      );
 
       return user;
     } catch (e) {

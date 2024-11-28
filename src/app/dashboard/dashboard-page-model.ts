@@ -9,9 +9,9 @@ import useMediaModel from '@/application/modules/pages/presentation/models/media
 import usePageModel from '@/application/modules/pages/presentation/models/page-model';
 import useSectionModel from '@/application/modules/pages/presentation/models/section-model';
 import axiosInstance from '@/infra/http/axiosService';
-import { GraphQlClient } from '@/infra/http/onClientApolloService';
-import StrapiPagesApiRepository from '@/infra/http/strapi/pages/repository/strapi-pages-api-repository';
+import BackendPagesRepository from '@/infra/http/backend/pages/repository/backend-pages-repository';
 import usePagesStore from '@/store/pages';
+import useUserStore from '@/store/uset';
 import { themeColors } from '@/theme/color';
 import QRCodeStyling from 'qr-code-styling';
 import { useEffect, useState } from 'react';
@@ -58,21 +58,18 @@ export default function useDashboardPageModel() {
     navigationMenuPage[0].value
   );
 
-  const [currentPage, setCurrentPage] = useState<Page>();
-  const { pages, setSelectedPage, pageSelected, setPages } = usePagesStore();
-
-  const pageRepository = new StrapiPagesApiRepository(
-    GraphQlClient,
-    axiosInstance
-  );
-
   const {
-    fetchPageById: fetchPageByIdModel,
-    updatePage,
-    deletePage,
-    publishPage,
-    unPublishPage
-  } = usePageModel({
+    pages,
+    setSelectedPage,
+    pageSelected,
+    setPages,
+    refreshSelectedPage
+  } = usePagesStore();
+
+  const { jwtToken } = useUserStore();
+  const pageRepository = new BackendPagesRepository(axiosInstance, jwtToken);
+
+  const { updatePage, deletePage, publishPage, unPublishPage } = usePageModel({
     pageRepository
   });
 
@@ -84,16 +81,10 @@ export default function useDashboardPageModel() {
     unpublishSection
   } = useSectionModel({ pageRepository });
 
-  const {
-    createItem,
-    createSectionItem,
-    updateItem,
-    deleteItem,
-    publishItem,
-    unPublishItem
-  } = useItemModel({
-    pageRepository
-  });
+  const { createItem, updateItem, deleteItem, publishItem, unPublishItem } =
+    useItemModel({
+      pageRepository
+    });
 
   const { uploadMedia } = useMediaModel({ pageRepository });
 
@@ -104,38 +95,32 @@ export default function useDashboardPageModel() {
   }, [pages]);
 
   function liveUpdateSection(section: Section, index: number) {
-    if (currentPage) {
-      const sections = currentPage.sectionsPages || [];
+    if (pageSelected) {
+      const sections = pageSelected.sectionsPages || [];
       sections[index] = section;
-      setCurrentPage({
-        ...currentPage,
+      setSelectedPage({
+        ...pageSelected,
         sectionsPages: sections
       });
     }
   }
 
   function liveUpdateItem(currentItem: Item, index: number) {
-    if (currentPage) {
-      const items = currentPage.items || [];
+    if (pageSelected) {
+      const items = pageSelected.items || [];
       items[index] = currentItem;
-      setCurrentPage({
-        ...currentPage,
+      setSelectedPage({
+        ...pageSelected,
         items
       });
     }
   }
 
-  async function fetchPageById(id: string) {
-    const page = await fetchPageByIdModel(id);
-    if (page) {
-      setCurrentPage(page);
-    }
-  }
-
   async function updateCurrentPage(data: PageSchema) {
-    if (currentPage) {
-      await updatePage(data, currentPage.id)
-        .then((page) => {
+    if (pageSelected) {
+      await updatePage(data, pageSelected.id)
+        .then(async (page) => {
+          await refreshSelectedPage();
           toast('Ôba, sua página foi atualizada');
         })
         .catch((e) => {
@@ -156,9 +141,9 @@ export default function useDashboardPageModel() {
         atualPages.splice(pageIndex, 1);
         setPages(atualPages);
         if (pageSelected?.id === pageId && pages.length) {
-          setCurrentPage(pages[0]);
+          setSelectedPage(pages[0]);
         } else {
-          setCurrentPage(undefined);
+          setSelectedPage(undefined);
         }
       });
     }
@@ -171,10 +156,10 @@ export default function useDashboardPageModel() {
   async function handlerPublishPage(page: Page) {
     await publishPage(page.id)
       .then((publishedAt) => {
-        setCurrentPage((prev) => ({
-          ...prev!,
+        setSelectedPage({
+          ...pageSelected!,
           publishedAt
-        }));
+        });
         toast(`A página "${page.name}" foi pulicada com sucesso !`, {
           description: `Ela está disponível em: ${getPageUrl(page)}`
         });
@@ -189,10 +174,10 @@ export default function useDashboardPageModel() {
   async function handlerUnPublishPage(page: Page) {
     await unPublishPage(page.id)
       .then((publishedAt) => {
-        setCurrentPage((prev) => ({
-          ...prev!,
+        setSelectedPage({
+          ...pageSelected!,
           publishedAt
-        }));
+        });
         toast(`A página "${page.name}" foi despulicada com sucesso !`, {
           description: 'Sua página não está mais disponível'
         });
@@ -205,38 +190,14 @@ export default function useDashboardPageModel() {
   }
 
   async function handlerCreateSection(section: SectionSchema) {
-    await createSection(section)
+    await createSection({
+      ...section,
+      pageId: pageSelected?.id
+    })
       .then(async (section) => {
-        const sections = currentPage?.sectionsPages || [];
-        sections.push(section);
-
-        if (currentPage) {
-          await updatePage(
-            {
-              sections: sections.map((currentSection) => currentSection.id)
-            },
-            currentPage.id
-          )
-            .then(() => {
-              setCurrentPage((prev) => {
-                return prev
-                  ? {
-                      ...prev,
-                      sectionsPages: sections
-                    }
-                  : prev;
-              });
-
-              toast('Ôba, você criou uma nova secção');
-            })
-            .catch((e) => {
-              console.error(e);
-              toast('Ops, tivemos um problema', {
-                description:
-                  'Por algum motivo não conseguimos atualizar sua página'
-              });
-            });
-        }
+        if (!pageSelected) return;
+        await refreshSelectedPage();
+        toast('Ôba, você criou uma nova secção');
       })
       .catch((e) => {
         console.error(e);
@@ -260,28 +221,10 @@ export default function useDashboardPageModel() {
   }
 
   async function handlerDeleteSection(sectionId: string) {
-    if (!currentPage?.sectionsPages?.length) return;
-    const { sectionsPages: sections } = currentPage;
-
-    const sectionIndex = sections.findIndex(
-      (currentSection) => currentSection.id === sectionId
-    );
-
+    if (!pageSelected?.sectionsPages?.length) return;
     await deleteSection(sectionId)
-      .then(() => {
-        setCurrentPage((prev) => {
-          return prev
-            ? {
-                ...prev,
-                sectionsPages:
-                  sectionIndex > -1 && sectionIndex === 0
-                    ? undefined
-                    : prev.sectionsPages?.filter(
-                        (currentSection) => currentSection.id !== sectionId
-                      )
-              }
-            : prev;
-        });
+      .then(async () => {
+        await refreshSelectedPage();
         toast('Pronto, sua secção foi excluida.');
       })
       .catch((e) => {
@@ -294,24 +237,9 @@ export default function useDashboardPageModel() {
 
   async function handlerPublishSection(section: Section) {
     await publishSection(section.id)
-      .then((publishedAt) => {
+      .then(async () => {
+        await refreshSelectedPage();
         toast(`A secção ${section.title} foi publicado !`);
-        setCurrentPage((prev) => {
-          return prev
-            ? {
-                ...prev,
-                sectionsPages: prev?.sectionsPages?.map((mapSection) => {
-                  if (section.id === mapSection.id) {
-                    return {
-                      ...mapSection,
-                      publishedAt
-                    };
-                  }
-                  return mapSection;
-                })
-              }
-            : prev;
-        });
       })
       .catch((e) => {
         console.error(e.message);
@@ -323,24 +251,9 @@ export default function useDashboardPageModel() {
 
   async function handlerUnpublishSection(section: Section) {
     await unpublishSection(section.id)
-      .then((res) => {
+      .then(async () => {
+        await refreshSelectedPage();
         toast(`A secção ${section.title} foi despublicada !`);
-        setCurrentPage((prev) => {
-          return prev
-            ? {
-                ...prev,
-                sectionsPages: prev?.sectionsPages?.map((mapSection) => {
-                  if (section.id === mapSection.id) {
-                    return {
-                      ...mapSection,
-                      publishedAt: res
-                    };
-                  }
-                  return mapSection;
-                })
-              }
-            : prev;
-        });
       })
       .catch((e) => {
         console.error(e.message);
@@ -351,242 +264,56 @@ export default function useDashboardPageModel() {
   }
 
   async function handlerUpdateItem(item: ItemSchema, id: string) {
-    const result = await updateItem(item, id);
-
-    if (result.id === 'success') {
-      toast(`O Item foi atualizada`);
-      return;
-    }
-
-    toast('Ops, tivemos um problema', {
-      description: 'Tente em alguns estantes'
-    });
+    await updateItem(item, id)
+      .then(async () => {
+        await refreshSelectedPage();
+        toast(`O Item foi atualizada`);
+      })
+      .catch(() => {
+        toast('Ops, tivemos um problema', {
+          description: 'Tente em alguns estantes'
+        });
+      });
   }
 
   async function handlerCreateItem(item: ItemSchema, sectionId?: string) {
-    if (sectionId && currentPage?.sectionsPages?.length) {
-      const contextSectionIndex = currentPage.sectionsPages.findIndex(
-        (currentSection) => currentSection.id === sectionId
-      );
-
-      if (contextSectionIndex > -1) {
-        const currentSection = currentPage.sectionsPages[contextSectionIndex];
-
-        // Começa o processo de criação e relacionamento das entidades.
-        return await createSectionItem(item, currentSection)
-          .then((sectionItems) => {
-            setCurrentPage({
-              ...currentPage,
-              sectionsPages: currentPage?.sectionsPages?.map((section) => {
-                if (section.id === sectionId) {
-                  return {
-                    ...section,
-                    items: sectionItems
-                  };
-                }
-                return section;
-              })
-            });
-            toast(`O Item "${item.title}" criado com sucesso!`);
-          })
-          .catch((e) => {
-            console.error(e);
-            toast('Ops, tivemos um problema', {
-              description: 'Tente em alguns estantes'
-            });
-          });
-      }
-
-      toast('Ops, tivemos um problema', {
-        description: 'Algo deu errado com a secção em questão.'
-      });
-      return;
-    }
-
-    // Se for um item avulso
-    await createItem(item)
-      .then(async (createdItem) => {
-        const itemsPage: Item[] = currentPage?.items?.length
-          ? currentPage.items
-          : [];
-
-        itemsPage.push(createdItem);
-
-        await updatePage(
-          {
-            items: itemsPage.map((item) => item.id)
-          },
-          currentPage?.id!
-        ).then(() => {
-          setCurrentPage({
-            ...currentPage,
-            items: itemsPage
-          } as Page);
-          toast(`O Item "${item.title}" criado com sucesso!`);
-        });
+    await createItem({
+      ...item,
+      sectionId,
+      pageId: sectionId ? undefined : pageSelected?.id
+    })
+      .then(async () => {
+        await refreshSelectedPage();
+        toast(`O Item "${item.title}" criado com sucesso!`);
       })
       .catch((e) => {
         console.error(e);
-
         toast('Ops, tivemos um problema', {
-          description:
-            'Algo deu errado ao criar o item, tente em alguns estantes.'
+          description: 'Tente em alguns estantes'
         });
       });
   }
 
   async function handlerDeleteItem(id: string, sectionId?: string) {
-    if (currentPage?.sectionsPages?.length && sectionId) {
-      const contextSectionIndex = currentPage.sectionsPages.findIndex(
-        (currentSection) => currentSection.id === sectionId
-      );
-
-      if (contextSectionIndex > -1) {
-        let contextItems =
-          currentPage.sectionsPages[contextSectionIndex].items || [];
-
-        const itemIndex = contextItems?.findIndex(
-          (currentItem) => currentItem.id === id
-        );
-
-        if (itemIndex > -1 && contextItems?.length > 1) {
-          contextItems.splice(itemIndex, 1);
-        } else {
-          contextItems = [];
-        }
-
-        setCurrentPage({
-          ...currentPage,
-          sectionsPages: currentPage.sectionsPages.map((currentSection) => {
-            if (currentSection.id === sectionId) {
-              return {
-                ...currentSection,
-                items: contextItems
-              };
-            }
-            return currentSection;
-          })
+    await deleteItem(id)
+      .then(async () => {
+        await refreshSelectedPage();
+        toast(`O item foi excluído!"`);
+      })
+      .catch(() => {
+        toast('Ops, tivemos um problema', {
+          description: 'Não foi possível excluir seu item.'
         });
-
-        const sectionToUpdate = currentPage.sectionsPages[contextSectionIndex];
-
-        await updateSection(
-          {
-            title: sectionToUpdate.title,
-            alignContent: sectionToUpdate.alignContent,
-            items: contextItems?.map((item) => item.id) || undefined
-          },
-          sectionId
-        );
-
-        await deleteItem(id)
-          .then(() => {
-            toast(`O item foi excluído!"`);
-          })
-          .catch(() => {
-            toast('Ops, tivemos um problema', {
-              description: 'Não foi possível excluir seu item.'
-            });
-            return;
-          });
-        return;
-      }
-
-      toast('Ops, tivemos um problema', {
-        description: 'Parece que a secção em questão não existe mais.'
       });
-      return;
-    }
-
-    if (currentPage?.items?.length) {
-      let currentItems = currentPage.items;
-
-      const itemIndex = currentItems?.findIndex(
-        (currentItem) => currentItem.id === id
-      );
-
-      if (itemIndex > -1 && currentItems?.length > 1) {
-        currentItems.splice(itemIndex, 1);
-      } else {
-        currentItems = undefined!;
-      }
-
-      await updatePage(
-        {
-          items: currentItems?.map((item) => item.id) || undefined
-        },
-        currentPage.id
-      )
-        .then(async () => {
-          await deleteItem(id).then(() => {
-            setCurrentPage({
-              ...currentPage,
-              items: currentItems
-            });
-          });
-        })
-        .catch(() => {
-          toast('Ops, tivemos um problema', {
-            description: 'Não foi possível excluir seu item.'
-          });
-        });
-
-      toast(`O item foi excluído!`);
-    }
   }
 
   async function handlerPublishItem(item: Item, sectionId?: string) {
     await publishItem(item.id)
-      .then((publishedAt) => {
+      .then(async () => {
+        await refreshSelectedPage();
         toast(`O item ${item.title} foi publicado !`);
-        if (sectionId) {
-          setCurrentPage((prev) => {
-            return prev
-              ? {
-                  ...prev,
-                  sectionsPages: prev.sectionsPages?.map((currentSection) => {
-                    if (currentSection.id === sectionId) {
-                      return {
-                        ...currentSection,
-                        items: currentSection.items?.map(
-                          (currentSectionItem) => {
-                            if (currentSectionItem.id === item.id) {
-                              return {
-                                ...currentSectionItem,
-                                publishedAt: publishedAt
-                              };
-                            }
-                            return currentSectionItem;
-                          }
-                        )
-                      };
-                    }
-                    return currentSection;
-                  })
-                }
-              : prev;
-          });
-          return;
-        }
-        setCurrentPage((prev) => {
-          return prev
-            ? {
-                ...prev,
-                items: prev?.items?.map((mapItem) => {
-                  if (item.id === mapItem.id) {
-                    return {
-                      ...mapItem,
-                      publishedAt: publishedAt
-                    };
-                  }
-                  return mapItem;
-                })
-              }
-            : prev;
-        });
       })
-      .catch((e) => {
-        console.error(e.message);
+      .catch(() => {
         toast('Ops, tivemos um problema', {
           description: `Não foi possível publicar o item ${item.title}`
         });
@@ -595,56 +322,11 @@ export default function useDashboardPageModel() {
 
   async function handlerUnpublishItem(item: Item, sectionId?: string) {
     await unPublishItem(item.id)
-      .then((res) => {
+      .then(async () => {
+        await refreshSelectedPage();
         toast(`O item ${item.title} foi despublicado !`);
-        if (sectionId) {
-          setCurrentPage((prev) => {
-            return prev
-              ? {
-                  ...prev,
-                  sectionsPages: prev.sectionsPages?.map((currentSection) => {
-                    if (currentSection.id === sectionId) {
-                      return {
-                        ...currentSection,
-                        items: currentSection.items?.map(
-                          (currentSectionItem) => {
-                            if (currentSectionItem.id === item.id) {
-                              return {
-                                ...currentSectionItem,
-                                publishedAt: res
-                              };
-                            }
-                            return currentSectionItem;
-                          }
-                        )
-                      };
-                    }
-                    return currentSection;
-                  })
-                }
-              : prev;
-          });
-          return;
-        }
-        setCurrentPage((prev) => {
-          return prev
-            ? {
-                ...prev,
-                items: prev?.items?.map((mapItem) => {
-                  if (item.id === mapItem.id) {
-                    return {
-                      ...mapItem,
-                      publishedAt: res
-                    };
-                  }
-                  return mapItem;
-                })
-              }
-            : prev;
-        });
       })
-      .catch((e) => {
-        console.error(e.message);
+      .catch(() => {
         toast('Ops, tivemos um problema', {
           description: `Não foi possível despublicar o item ${item.title}`
         });
@@ -671,8 +353,8 @@ export default function useDashboardPageModel() {
   }
 
   async function sharePage(option: 'card' | 'QRCode' | 'copyLinkPage') {
-    if (!currentPage) return;
-    const url = `${BASEURL}/${currentPage.slug}`;
+    if (!pageSelected) return;
+    const url = `${BASEURL}/${pageSelected.slug}`;
     switch (option) {
       case 'card':
         const qrCodeCard = new QRCodeStyling({
@@ -704,7 +386,7 @@ export default function useDashboardPageModel() {
             color: themeColors.dark.scrim
           }
         });
-        qrCode.download({ extension: 'png', name: currentPage.name });
+        qrCode.download({ extension: 'png', name: pageSelected.name });
         break;
       default:
         await navigator.clipboard.writeText(url).then(() => {
@@ -714,12 +396,6 @@ export default function useDashboardPageModel() {
         });
     }
   }
-
-  useEffect(() => {
-    if (pageSelected) {
-      fetchPageById(pageSelected.id);
-    }
-  }, [pageSelected]);
 
   return {
     uploadMedia,
@@ -741,12 +417,10 @@ export default function useDashboardPageModel() {
     liveUpdateItem,
     onDeleteConfirmation,
     sharePage,
-    currentPage,
     navigationMenuPage,
     setCurrentTab,
     currentTab,
     setConfirmActionData,
-    setCurrentPage,
     confirmActionData,
     cardDialogOpen,
     setCardDialogOpen,

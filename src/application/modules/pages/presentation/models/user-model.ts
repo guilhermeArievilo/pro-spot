@@ -24,9 +24,12 @@ export default function useUserModel({ userRepository }: useUserModelProps) {
     return result;
   }
 
-  async function createUser(userData: UserScheme) {
+  async function createUser(
+    userData: UserScheme,
+    injectJwtProperties?: (token: string, expiresIn: number) => void
+  ) {
     const createUser = new CreateUserUsecase(userRepository);
-    const user = await createUser.execute(userData);
+    const user = await createUser.execute(userData, injectJwtProperties);
 
     return user;
   }

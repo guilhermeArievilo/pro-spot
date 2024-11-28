@@ -1,5 +1,6 @@
 import { Media } from '@/application/entities';
 import { BackendMedia } from '../entities/backend-media-entities';
+import getImageUrl from '@/lib/loader';
 
 export function toMediaDomain({
   id,
@@ -11,7 +12,7 @@ export function toMediaDomain({
 }: BackendMedia): Media {
   return {
     id,
-    src: url,
+    src: getImageUrl(url),
     height,
     width,
     alt: name,
